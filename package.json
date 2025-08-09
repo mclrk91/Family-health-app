@@ -3,18 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-  "dev": "next dev --turbopack",
-  "build": "prisma generate && prisma migrate deploy && next build",
-  "start": "next start",
-  "lint": "next lint",
-  "db:generate": "prisma generate",
-  "db:push": "prisma db push",
-  "db:migrate": "prisma migrate dev",
-  "db:seed": "tsx prisma/seed.ts",
-  "db:studio": "prisma studio",
-  "postinstall": "prisma generate"
-}
-
+    "dev": "next dev --turbopack",
+    "build": "prisma generate && prisma migrate deploy && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate"
+  },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
