@@ -1,0 +1,309 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+enum Species {
+  HUMAN
+  CANINE
+}
+
+enum ReminderFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  ANNUALLY
+  CUSTOM
+}
+
+enum ReminderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  OVERDUE
+}
+
+model Person {
+  id          String   @id @default(cuid())
+  name        String
+  species     Species  @default(HUMAN)
+  dateOfBirth DateTime?
+  bloodType   String?
+  
+  // Canine-specific fields
+  breed       String?
+  microchipId String?
+  weight      Float?
+  weightUnit  String? @default("lbs")
+  
+  // Relationships
+  allergies       Allergy[]
+  medications     Medication[]
+  diagnoses       Diagnosis[]
+  procedures      Procedure[]
+  vaccines        Vaccine[]
+  labResults      LabResult[]
+  vitals          Vital[]
+  documents       Document[]
+  reminders       Reminder[]
+  appointments    Appointment[]
+  healthSummaries HealthSummary[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("people")
+}
+
+model Doctor {
+  id        String   @id @default(cuid())
+  name      String
+  specialty String?
+  phone     String?
+  email     String?
+  clinicId  String?
+  clinic    Clinic?  @relation(fields: [clinicId], references: [id])
+  
+  // Relationships
+  labResults    LabResult[]
+  vaccines      Vaccine[]
+  procedures    Procedure[]
+  diagnoses     Diagnosis[]
+  medications   Medication[]
+  vitals        Vital[]
+  appointments  Appointment[]
+  reminders     Reminder[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Clinic {
+  id          String   @id @default(cuid())
+  name        String
+  address     String?
+  phone       String?
+  email       String?
+  website     String?
+  
+  // Relationships
+  doctors     Doctor[]
+  labResults  LabResult[]
+  vaccines    Vaccine[]
+  procedures  Procedure[]
+  diagnoses   Diagnosis[]
+  medications Medication[]
+  vitals      Vital[]
+  appointments Appointment[]
+  reminders   Reminder[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Allergy {
+  id          String   @id @default(cuid())
+  name        String
+  severity    String?  // mild, moderate, severe
+  reaction    String?
+  notes       String?
+  personId    String
+  person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Medication {
+  id          String   @id @default(cuid())
+  name        String
+  dosage      String?
+  frequency   String?
+  startDate   DateTime?
+  endDate     DateTime?
+  notes       String?
+  personId    String
+  person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  doctorId    String?
+  doctor      Doctor?  @relation(fields: [doctorId], references: [id])
+  clinicId    String?
+  clinic      Clinic?  @relation(fields: [clinicId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Diagnosis {
+  id          String   @id @default(cuid())
+  name        String
+  date        DateTime
+  notes       String?
+  personId    String
+  person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  doctorId    String?
+  doctor      Doctor?  @relation(fields: [doctorId], references: [id])
+  clinicId    String?
+  clinic      Clinic?  @relation(fields: [clinicId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Procedure {
+  id          String   @id @default(cuid())
+  name        String
+  date        DateTime
+  notes       String?
+  personId    String
+  person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  doctorId    String?
+  doctor      Doctor?  @relation(fields: [doctorId], references: [id])
+  clinicId    String?
+  clinic      Clinic?  @relation(fields: [clinicId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Vaccine {
+  id          String   @id @default(cuid())
+  name        String
+  date        DateTime
+  nextDueDate DateTime?
+  notes       String?
+  personId    String
+  person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  doctorId    String?
+  doctor      Doctor?  @relation(fields: [doctorId], references: [id])
+  clinicId    String?
+  clinic      Clinic?  @relation(fields: [clinicId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LabResult {
+  id          String   @id @default(cuid())
+  date        DateTime
+  testName    String
+  notes       String?
+  personId    String
+  person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  doctorId    String?
+  doctor      Doctor?  @relation(fields: [doctorId], references: [id])
+  clinicId    String?
+  clinic      Clinic?  @relation(fields: [clinicId], references: [id])
+  
+  // Relationships
+  components  LabComponent[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LabComponent {
+  id          String   @id @default(cuid())
+  name        String
+  value       Float?
+  unit        String?
+  referenceLow  Float?
+  referenceHigh Float?
+  isAbnormal   Boolean @default(false)
+  labResultId  String
+  labResult    LabResult @relation(fields: [labResultId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Vital {
+  id          String   @id @default(cuid())
+  type        String   // blood pressure, heart rate, temperature, weight, etc.
+  value       Float
+  unit        String?
+  date        DateTime
+  notes       String?
+  personId    String
+  person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  doctorId    String?
+  doctor      Doctor?  @relation(fields: [doctorId], references: [id])
+  clinicId    String?
+  clinic      Clinic?  @relation(fields: [clinicId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Appointment {
+  id          String   @id @default(cuid())
+  title       String
+  date        DateTime
+  duration    Int?     // in minutes
+  notes       String?
+  personId    String
+  person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  doctorId    String?
+  doctor      Doctor?  @relation(fields: [doctorId], references: [id])
+  clinicId    String?
+  clinic      Clinic?  @relation(fields: [clinicId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Reminder {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime
+  frequency   ReminderFrequency @default(ANNUALLY)
+  status      ReminderStatus @default(PENDING)
+  notes       String?
+  personId    String
+  person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  doctorId    String?
+  doctor      Doctor?  @relation(fields: [doctorId], references: [id])
+  clinicId    String?
+  clinic      Clinic?  @relation(fields: [clinicId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  name        String
+  fileName    String   // Original filename
+  filePath    String   // Supabase storage path
+  fileSize    Int
+  mimeType    String
+  notes       String?
+  personId    String
+  person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model HealthSummary {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   // JSON or text content
+  date        DateTime
+  personId    String
+  person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
