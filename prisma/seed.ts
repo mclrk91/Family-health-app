@@ -4,7 +4,6 @@ const prisma = new PrismaClient()
 
 async function main() {
   // Clear existing data
-  await prisma.healthSummary.deleteMany()
   await prisma.document.deleteMany()
   await prisma.reminder.deleteMany()
   await prisma.appointment.deleteMany()
