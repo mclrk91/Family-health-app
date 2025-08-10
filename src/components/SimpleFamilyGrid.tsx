@@ -72,17 +72,21 @@ export default function SimpleFamilyGrid() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
       {familyMembers.map((member) => (
         <Link key={member.id} href={`/family/${member.id}`}>
-          <Card className={`hover:shadow-lg transition-shadow duration-200 cursor-pointer ${member.color} border-0`}>
+          <Card className="hover:shadow-lg transition-shadow duration-200 cursor-pointer bg-white border border-gray-200">
             <CardHeader className="text-center pb-2">
               <div className="flex justify-center mb-3">
                 <Avatar className="w-20 h-20 border-4 border-white shadow-lg">
-                  <AvatarImage src={member.image} alt={member.name} />
-                  <AvatarFallback className="text-2xl font-bold bg-white">
+                  <AvatarImage 
+                    src={member.image} 
+                    alt={member.name}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="text-2xl font-bold bg-gray-100">
                     {member.name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
               </div>
-              <CardTitle className={`text-xl font-bold ${member.textColor}`}>
+              <CardTitle className="text-xl font-bold text-gray-900">
                 {member.name}
               </CardTitle>
             </CardHeader>
