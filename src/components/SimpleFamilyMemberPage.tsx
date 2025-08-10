@@ -20,6 +20,7 @@ type FamilyMember = {
   breed?: string;
   weight?: string;
   microchipId?: string;
+  microchipDate?: string;
 };
 
 // Define types for vaccines and test results
@@ -55,6 +56,24 @@ type WeightRecord = {
   date: string;
   weight: number;
   notes?: string;
+};
+
+// Define types for medications
+type Medication = {
+  id: string;
+  name: string;
+  type: string;
+  datePrescribed: string;
+  notes: string;
+};
+
+// Define types for preventive care
+type PreventiveCare = {
+  id: string;
+  type: string;
+  name: string;
+  dateStarted: string;
+  notes: string;
 };
 
 // Hardcoded family member data
@@ -99,8 +118,9 @@ const familyData: Record<string, FamilyMember> = {
     age: 4,
     breed: 'English Cream Golden Retriever',
     weight: '83.9 lbs',
-    microchipId: '981020031240389',
-    birthday: 'August 14, 2020',
+    microchipId: '985141009123456',
+    microchipDate: '2020-11-23',
+    birthday: 'November 23, 2020',
     image: '/family-photos/Bentley.jpg',
     tabs: ['Overview', 'Health Summary', 'Vaccines', 'Medications', 'Medical History', 'Test Results', 'Documents', 'Reminders']
   }
@@ -121,6 +141,132 @@ const initialVaccines: Vaccine[] = [
     dateGiven: '2024-11-26',
     nextDueDate: '2025-11-26',
     notes: 'Annual vaccination'
+  },
+  {
+    id: '3',
+    name: 'Bordetella Vaccine',
+    dateGiven: '2024-11-26',
+    nextDueDate: '2025-11-26',
+    notes: 'Annual vaccination'
+  },
+  {
+    id: '4',
+    name: 'Canine Influenza Vaccine',
+    dateGiven: '2024-11-26',
+    nextDueDate: '2025-11-26',
+    notes: 'Annual vaccination'
+  },
+  {
+    id: '5',
+    name: 'Rabies Vaccine',
+    dateGiven: '2021-11-15',
+    nextDueDate: '2024-11-15',
+    notes: '3 Year Rabies Vaccine'
+  },
+  {
+    id: '6',
+    name: 'DA2PP Vaccine',
+    dateGiven: '2023-11-21',
+    nextDueDate: '2024-11-21',
+    notes: 'Annual vaccination'
+  },
+  {
+    id: '7',
+    name: 'Bordetella Vaccine',
+    dateGiven: '2023-11-21',
+    nextDueDate: '2024-11-21',
+    notes: 'Annual vaccination'
+  },
+  {
+    id: '8',
+    name: 'Canine Influenza Vaccine',
+    dateGiven: '2023-01-24',
+    nextDueDate: '2024-01-24',
+    notes: 'Annual vaccination'
+  },
+  {
+    id: '9',
+    name: 'DA2PP Vaccine',
+    dateGiven: '2022-11-15',
+    nextDueDate: '2023-11-15',
+    notes: 'Annual vaccination'
+  },
+  {
+    id: '10',
+    name: 'Bordetella Vaccine',
+    dateGiven: '2022-11-15',
+    nextDueDate: '2023-11-15',
+    notes: 'Annual vaccination'
+  },
+  {
+    id: '11',
+    name: 'Canine Influenza Vaccine',
+    dateGiven: '2022-01-13',
+    nextDueDate: '2023-01-13',
+    notes: 'Annual vaccination'
+  },
+  {
+    id: '12',
+    name: 'DA2PP Vaccine',
+    dateGiven: '2021-11-15',
+    nextDueDate: '2022-11-15',
+    notes: 'Annual vaccination'
+  },
+  {
+    id: '13',
+    name: 'Bordetella Vaccine',
+    dateGiven: '2021-11-15',
+    nextDueDate: '2022-11-15',
+    notes: 'Annual vaccination'
+  },
+  {
+    id: '14',
+    name: 'Canine Influenza Vaccine',
+    dateGiven: '2021-01-13',
+    nextDueDate: '2022-01-13',
+    notes: '#2 of 2'
+  },
+  {
+    id: '15',
+    name: 'Canine Influenza Vaccine',
+    dateGiven: '2020-12-23',
+    nextDueDate: '2021-01-13',
+    notes: '#1 of 2'
+  },
+  {
+    id: '16',
+    name: 'DA2PP Vaccine',
+    dateGiven: '2020-12-23',
+    nextDueDate: '2021-12-23',
+    notes: 'Annual vaccination'
+  },
+  {
+    id: '17',
+    name: 'Bordetella Vaccine',
+    dateGiven: '2020-12-23',
+    nextDueDate: '2021-12-23',
+    notes: 'Annual vaccination'
+  },
+  {
+    id: '18',
+    name: 'Rabies Vaccine',
+    dateGiven: '2020-12-23',
+    nextDueDate: '2021-12-23',
+    notes: '1 Year'
+  },
+  {
+    id: '19',
+    name: 'DA2PP Vaccine',
+    dateGiven: '2020-11-23',
+    nextDueDate: '2021-11-23',
+    notes: 'Initial vaccination'
+  },
+  {
+    id: '20',
+    name: 'Bordetella Vaccine',
+    dateGiven: '2020-10-15',
+    nextDueDate: '2021-10-15',
+    notes: 'Initial vaccination'
   }
 ];
 
@@ -178,37 +324,180 @@ const initialDocuments: Document[] = [
   }
 ];
 
+// Initial medications for Bentley
+const initialMedications: Medication[] = [
+  {
+    id: '1',
+    name: 'Cefpodoxime',
+    type: 'Antibiotics',
+    datePrescribed: '2021-07-06',
+    notes: 'For allergic reaction to neuter'
+  },
+  {
+    id: '2',
+    name: 'Doxycycline',
+    type: 'Antibiotics',
+    datePrescribed: '2023-02-13',
+    notes: 'For respiratory infection'
+  },
+  {
+    id: '3',
+    name: 'Carprofen',
+    type: 'Pain/Anti-inflammatory',
+    datePrescribed: '2021-06-29',
+    notes: 'Post-neuter pain management'
+  },
+  {
+    id: '4',
+    name: 'Hydrocodone',
+    type: 'Pain/Anti-inflammatory',
+    datePrescribed: '2023-02-13',
+    notes: 'For cough'
+  },
+  {
+    id: '5',
+    name: 'Hydrocodone',
+    type: 'Pain/Anti-inflammatory',
+    datePrescribed: '2023-02-21',
+    notes: 'Cough follow-up'
+  },
+  {
+    id: '6',
+    name: 'NeoPolyDex',
+    type: 'Eye Drops',
+    datePrescribed: '2021-12-14',
+    notes: 'For eye inflammation'
+  },
+  {
+    id: '7',
+    name: 'NeoPolyDex',
+    type: 'Eye Drops',
+    datePrescribed: '2023-06-20',
+    notes: 'For eye inflammation'
+  },
+  {
+    id: '8',
+    name: 'Chlorhex Rinse',
+    type: 'Topical/Ear Treatments',
+    datePrescribed: '2021-07-06',
+    notes: 'For allergic reaction to neuter'
+  },
+  {
+    id: '9',
+    name: 'Epi-Otic',
+    type: 'Topical/Ear Treatments',
+    datePrescribed: '2022-11-15',
+    notes: 'Ear treatment'
+  },
+  {
+    id: '10',
+    name: 'Surolan',
+    type: 'Topical/Ear Treatments',
+    datePrescribed: '2022-11-15',
+    notes: 'Ear treatment'
+  },
+  {
+    id: '11',
+    name: 'Neo-Predef powder',
+    type: 'Topical/Ear Treatments',
+    datePrescribed: '2021-07-06',
+    notes: 'For allergic reaction to neuter'
+  }
+];
+
+// Initial preventive care for Bentley
+const initialPreventiveCare: PreventiveCare[] = [
+  {
+    id: '1',
+    type: 'Heartworm Prevention',
+    name: 'Heartgard',
+    dateStarted: '2020-10-15',
+    notes: 'Monthly heartworm prevention'
+  },
+  {
+    id: '2',
+    type: 'Flea/Tick Prevention',
+    name: 'Nexgard',
+    dateStarted: '2020-10-15',
+    notes: 'Monthly flea and tick prevention'
+  },
+  {
+    id: '3',
+    type: 'Deworming',
+    name: 'Oral Deworming',
+    dateStarted: '2020-11-23',
+    notes: 'Initial deworming treatment'
+  },
+  {
+    id: '4',
+    type: 'Deworming',
+    name: 'Oral Deworming',
+    dateStarted: '2020-12-23',
+    notes: 'Follow-up deworming treatment'
+  }
+];
+
 // Initial weight data for Bentley
 const initialWeights: WeightRecord[] = [
   {
     id: '1',
-    date: '2024-11-26',
+    date: '2025-11-26',
     weight: 83.9,
     notes: 'Annual checkup'
   },
   {
     id: '2',
-    date: '2024-10-15',
-    weight: 82.1,
-    notes: 'Monthly weigh-in'
+    date: '2024-11-26',
+    weight: 83.9,
+    notes: 'Annual checkup'
   },
   {
     id: '3',
-    date: '2024-09-20',
-    weight: 80.5,
-    notes: 'Monthly weigh-in'
+    date: '2023-06-20',
+    weight: 79.4,
+    notes: 'Vet visit'
   },
   {
     id: '4',
-    date: '2024-08-15',
-    weight: 79.2,
-    notes: 'Monthly weigh-in'
+    date: '2023-02-21',
+    weight: 76.5,
+    notes: 'Vet visit'
   },
   {
     id: '5',
-    date: '2024-07-10',
-    weight: 78.0,
-    notes: 'Monthly weigh-in'
+    date: '2023-02-13',
+    weight: 83.2,
+    notes: 'Vet visit'
+  },
+  {
+    id: '6',
+    date: '2023-01-24',
+    weight: 83.2,
+    notes: 'Vet visit'
+  },
+  {
+    id: '7',
+    date: '2022-11-15',
+    weight: 83.2,
+    notes: 'Annual checkup'
+  },
+  {
+    id: '8',
+    date: '2022-01-13',
+    weight: 83.2,
+    notes: 'Vet visit'
+  },
+  {
+    id: '9',
+    date: '2021-12-14',
+    weight: 79.8,
+    notes: 'Vet visit'
+  },
+  {
+    id: '10',
+    date: '2020-11-23',
+    weight: 75.0,
+    notes: 'Initial vet visit'
   }
 ];
 
@@ -218,7 +507,9 @@ const STORAGE_KEYS = {
   TEST_RESULTS: (memberId: string) => `family-health-tests-${memberId}`,
   DOCUMENTS: (memberId: string) => `family-health-documents-${memberId}`,
   REMINDERS: (memberId: string) => `family-health-reminders-${memberId}`,
-  WEIGHTS: (memberId: string) => `family-health-weights-${memberId}`
+  WEIGHTS: (memberId: string) => `family-health-weights-${memberId}`,
+  MEDICATIONS: (memberId: string) => `family-health-medications-${memberId}`,
+  PREVENTIVE_CARE: (memberId: string) => `family-health-preventive-care-${memberId}`
 };
 
 interface SimpleFamilyMemberPageProps {
@@ -231,6 +522,8 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   const [showAddTest, setShowAddTest] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
   const [showAddWeight, setShowAddWeight] = useState(false);
+  const [showAddMedication, setShowAddMedication] = useState(false);
+  const [showAddPreventive, setShowAddPreventive] = useState(false);
   const [nextExamDate, setNextExamDate] = useState('11/2025');
   
   // Form states
@@ -255,6 +548,22 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     notes: ''
   });
   
+  // Medication form state
+  const [medicationForm, setMedicationForm] = useState({
+    name: '',
+    type: '',
+    datePrescribed: '',
+    notes: ''
+  });
+  
+  // Preventive care form state
+  const [preventiveForm, setPreventiveForm] = useState({
+    type: '',
+    name: '',
+    dateStarted: '',
+    notes: ''
+  });
+  
   // Document upload state
   const [documentForm, setDocumentForm] = useState({
     name: '',
@@ -267,11 +576,15 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [weights, setWeights] = useState<WeightRecord[]>([]);
+  const [medications, setMedications] = useState<Medication[]>([]);
+  const [preventiveCare, setPreventiveCare] = useState<PreventiveCare[]>([]);
   
   // Edit states
   const [editingVaccine, setEditingVaccine] = useState<string | null>(null);
   const [editingTest, setEditingTest] = useState<string | null>(null);
   const [editingWeight, setEditingWeight] = useState<string | null>(null);
+  const [editingMedication, setEditingMedication] = useState<string | null>(null);
+  const [editingPreventive, setEditingPreventive] = useState<string | null>(null);
   
   // Loading and error states
   const [loading, setLoading] = useState(true);
@@ -316,6 +629,22 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
         setWeights(initialWeights);
       }
       
+      // Load medications
+      const storedMedications = localStorage.getItem(STORAGE_KEYS.MEDICATIONS(memberId));
+      if (storedMedications) {
+        setMedications(JSON.parse(storedMedications));
+      } else if (isBentley) {
+        setMedications(initialMedications);
+      }
+      
+      // Load preventive care
+      const storedPreventive = localStorage.getItem(STORAGE_KEYS.PREVENTIVE_CARE(memberId));
+      if (storedPreventive) {
+        setPreventiveCare(JSON.parse(storedPreventive));
+      } else if (isBentley) {
+        setPreventiveCare(initialPreventiveCare);
+      }
+      
       setError(null);
     } catch (err) {
       console.error('Error loading data from localStorage:', err);
@@ -327,6 +656,8 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
         setTestResults(initialTestResults);
         setDocuments(initialDocuments);
         setWeights(initialWeights);
+        setMedications(initialMedications);
+        setPreventiveCare(initialPreventiveCare);
       }
     } finally {
       setLoading(false);
@@ -374,6 +705,26 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     }
   }, [weights, memberId, loading]);
 
+  useEffect(() => {
+    if (!loading) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.MEDICATIONS(memberId), JSON.stringify(medications));
+      } catch (err) {
+        console.error('Error saving medications to localStorage:', err);
+      }
+    }
+  }, [medications, memberId, loading]);
+
+  useEffect(() => {
+    if (!loading) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.PREVENTIVE_CARE(memberId), JSON.stringify(preventiveCare));
+      } catch (err) {
+        console.error('Error saving preventive care to localStorage:', err);
+      }
+    }
+  }, [preventiveCare, memberId, loading]);
+
   if (!member) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -399,7 +750,9 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
       vaccines,
       testResults,
       documents,
-      weights
+      weights,
+      medications,
+      preventiveCare
     };
     
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -420,10 +773,14 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
       setTestResults([]);
       setDocuments([]);
       setWeights([]);
+      setMedications([]);
+      setPreventiveCare([]);
       localStorage.removeItem(STORAGE_KEYS.VACCINES(memberId));
       localStorage.removeItem(STORAGE_KEYS.TEST_RESULTS(memberId));
       localStorage.removeItem(STORAGE_KEYS.DOCUMENTS(memberId));
       localStorage.removeItem(STORAGE_KEYS.WEIGHTS(memberId));
+      localStorage.removeItem(STORAGE_KEYS.MEDICATIONS(memberId));
+      localStorage.removeItem(STORAGE_KEYS.PREVENTIVE_CARE(memberId));
     }
   };
 
@@ -539,17 +896,73 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     setShowAddWeight(true);
   };
 
+  // Handle medication form submission
+  const handleMedicationSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (editingMedication) {
+      // Update existing medication
+      setMedications(medications.map(m => 
+        m.id === editingMedication 
+          ? { ...m, ...medicationForm }
+          : m
+      ));
+      setEditingMedication(null);
+    } else {
+      // Add new medication
+      const newMedication: Medication = {
+        id: Date.now().toString(),
+        ...medicationForm
+      };
+      setMedications([...medications, newMedication]);
+    }
+    
+    setMedicationForm({ name: '', type: '', datePrescribed: '', notes: '' });
+    setShowAddMedication(false);
+  };
+
+  // Handle preventive care form submission
+  const handlePreventiveSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (editingPreventive) {
+      // Update existing preventive care
+      setPreventiveCare(preventiveCare.map(p => 
+        p.id === editingPreventive 
+          ? { ...p, ...preventiveForm }
+          : p
+      ));
+      setEditingPreventive(null);
+    } else {
+      // Add new preventive care
+      const newPreventive: PreventiveCare = {
+        id: Date.now().toString(),
+        ...preventiveForm
+      };
+      setPreventiveCare([...preventiveCare, newPreventive]);
+    }
+    
+    setPreventiveForm({ type: '', name: '', dateStarted: '', notes: '' });
+    setShowAddPreventive(false);
+  };
+
   // Cancel editing
   const cancelEditing = () => {
     setEditingVaccine(null);
     setEditingTest(null);
     setEditingWeight(null);
+    setEditingMedication(null);
+    setEditingPreventive(null);
     setVaccineForm({ name: '', dateGiven: '', nextDueDate: '', notes: '' });
     setTestForm({ type: '', testDate: '', results: '', notes: '' });
     setWeightForm({ date: '', weight: '', notes: '' });
+    setMedicationForm({ name: '', type: '', datePrescribed: '', notes: '' });
+    setPreventiveForm({ type: '', name: '', dateStarted: '', notes: '' });
     setShowAddVaccine(false);
     setShowAddTest(false);
     setShowAddWeight(false);
+    setShowAddMedication(false);
+    setShowAddPreventive(false);
   };
 
   // Handle vaccine deletion
@@ -570,6 +983,44 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   const handleDeleteWeight = (id: string) => {
     if (confirm('Are you sure you want to delete this weight record?')) {
       setWeights(weights.filter(w => w.id !== id));
+    }
+  };
+
+  // Handle medication editing
+  const handleEditMedication = (medication: Medication) => {
+    setMedicationForm({
+      name: medication.name,
+      type: medication.type,
+      datePrescribed: medication.datePrescribed,
+      notes: medication.notes
+    });
+    setEditingMedication(medication.id);
+    setShowAddMedication(true);
+  };
+
+  // Handle preventive care editing
+  const handleEditPreventive = (preventive: PreventiveCare) => {
+    setPreventiveForm({
+      type: preventive.type,
+      name: preventive.name,
+      dateStarted: preventive.dateStarted,
+      notes: preventive.notes
+    });
+    setEditingPreventive(preventive.id);
+    setShowAddPreventive(true);
+  };
+
+  // Handle medication deletion
+  const handleDeleteMedication = (id: string) => {
+    if (confirm('Are you sure you want to delete this medication record?')) {
+      setMedications(medications.filter(m => m.id !== id));
+    }
+  };
+
+  // Handle preventive care deletion
+  const handleDeletePreventive = (id: string) => {
+    if (confirm('Are you sure you want to delete this preventive care record?')) {
+      setPreventiveCare(preventiveCare.filter(p => p.id !== id));
     }
   };
 
@@ -726,7 +1177,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
               <Download className="w-4 h-4 mr-2" />
               Export Data
             </Button>
-            {(vaccines.length > 0 || testResults.length > 0 || documents.length > 0 || weights.length > 0) && (
+            {(vaccines.length > 0 || testResults.length > 0 || documents.length > 0 || weights.length > 0 || medications.length > 0 || preventiveCare.length > 0) && (
               <Button variant="outline" onClick={clearAllData} className="text-red-600 hover:text-red-700">
                 Clear All Data
               </Button>
@@ -810,6 +1261,12 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
                     <div className="flex justify-between items-center">
                       <span className="font-semibold">Microchip ID:</span>
                       <span className="text-sm font-mono text-gray-600">{member.microchipId}</span>
+                    </div>
+                  )}
+                  {'microchipDate' in member && member.microchipDate && (
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold">Microchip Date:</span>
+                      <span className="text-sm text-gray-600">Implanted {member.microchipDate}</span>
                     </div>
                   )}
                 </CardContent>
@@ -1209,47 +1666,125 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
           {/* Medications Tab (Bentley only) */}
           {isBentley && (
             <TabsContent value="Medications" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Medication History</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-lg font-medium mb-4">Not on any medications currently.</p>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="font-semibold text-blue-600">Antibiotics</h3>
-                      <p className="text-sm text-gray-600">Cefpodoxime — 07-06-21</p>
-                      <p className="text-sm text-gray-600">Doxycycline — 02-13-23</p>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div>
-                      <h3 className="font-semibold text-green-600">Pain/Anti-inflammatory</h3>
-                      <p className="text-sm text-gray-600">Carprofen — 06-29-21 (post-neuter)</p>
-                      <p className="text-sm text-gray-600">Hydrocodone — 02-13-23, 02-21-23 (for cough)</p>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div>
-                      <h3 className="font-semibold text-purple-600">Eye Drops</h3>
-                      <p className="text-sm text-gray-600">NeoPolyDex — 12-14-21, 06-20-23</p>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div>
-                      <h3 className="font-semibold text-orange-600">Topical/Ear Treatments</h3>
-                      <p className="text-sm text-gray-600">Chlorhex Rinse — 07-06-21</p>
-                      <p className="text-sm text-gray-600">Epi-Otic — 11-15-22</p>
-                      <p className="text-sm text-gray-600">Surolan — 11-15-22</p>
-                      <p className="text-sm text-gray-600">Neo-Predef powder — 07-06-21</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Medication History</h2>
+                <Button onClick={() => setShowAddMedication(!showAddMedication)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  {editingMedication ? 'Edit Medication' : 'Add Medication'}
+                </Button>
+              </div>
+              
+              {showAddMedication && (
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle>{editingMedication ? 'Edit Medication' : 'Add New Medication'}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleMedicationSubmit} className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium">Medication Name *</label>
+                          <input 
+                            className="w-full p-2 border rounded mt-1" 
+                            placeholder="e.g., Cefpodoxime, Carprofen"
+                            value={medicationForm.name}
+                            onChange={(e) => setMedicationForm({...medicationForm, name: e.target.value})}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Type *</label>
+                          <select 
+                            className="w-full p-2 border rounded mt-1"
+                            value={medicationForm.type}
+                            onChange={(e) => setMedicationForm({...medicationForm, type: e.target.value})}
+                            required
+                          >
+                            <option value="">Select type</option>
+                            <option value="Antibiotics">Antibiotics</option>
+                            <option value="Pain/Anti-inflammatory">Pain/Anti-inflammatory</option>
+                            <option value="Eye Drops">Eye Drops</option>
+                            <option value="Topical/Ear Treatments">Topical/Ear Treatments</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Date Prescribed *</label>
+                          <input 
+                            type="date" 
+                            className="w-full p-2 border rounded mt-1"
+                            value={medicationForm.datePrescribed}
+                            onChange={(e) => setMedicationForm({...medicationForm, datePrescribed: e.target.value})}
+                            max={today}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Notes</label>
+                          <input 
+                            className="w-full p-2 border rounded mt-1" 
+                            placeholder="e.g., For cough, post-neuter"
+                            value={medicationForm.notes}
+                            onChange={(e) => setMedicationForm({...medicationForm, notes: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button type="submit">
+                          {editingMedication ? 'Update Medication' : 'Save Medication'}
+                        </Button>
+                        <Button type="button" variant="outline" onClick={cancelEditing}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="space-y-4">
+                {medications.map((medication) => (
+                  <Card key={medication.id}>
+                    <CardHeader>
+                      <CardTitle className="flex justify-between items-center">
+                        {medication.name}
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleEditMedication(medication)}
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => handleDeleteMedication(medication.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-600">Type</p>
+                          <Badge variant="outline">{medication.type}</Badge>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Date Prescribed</p>
+                          <p className="font-medium">{formatDate(medication.datePrescribed)}</p>
+                        </div>
+                      </div>
+                      {medication.notes && (
+                        <p className="text-sm text-gray-600 mt-2">{medication.notes}</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </TabsContent>
           )}
 
@@ -1294,14 +1829,14 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
                     
                     <div>
                       <h3 className="font-semibold text-green-600">Parasite Exams</h3>
-                      <p className="text-sm text-gray-600">Multiple dates, all normal</p>
+                      <p className="text-sm text-gray-600">Multiple dates, all normal (no abnormalities noted in invoices)</p>
                     </div>
                     
                     <Separator />
                     
                     <div>
                       <h3 className="font-semibold text-indigo-600">Heartworm Tests</h3>
-                      <p className="text-sm text-gray-600">Annual, all negative</p>
+                      <p className="text-sm text-gray-600">Annual, all likely negative (since preventive meds given and no treatment noted)</p>
                     </div>
                   </div>
                 </CardContent>
@@ -1585,33 +2120,124 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
           {/* Reminders Tab (Bentley only) */}
           {isBentley && (
             <TabsContent value="Reminders" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Health Reminders</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <Card className="border-orange-200 bg-orange-50">
-                      <CardContent className="pt-6">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h3 className="font-semibold text-orange-800">Next Annual Exam</h3>
-                            <p className="text-sm text-orange-600">Due: {nextExamDate}</p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="outline" onClick={() => setNextExamDate('12/2025')}>
-                              <Edit className="w-3 h-3" />
-                            </Button>
-                            <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </div>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Health Reminders</h2>
+                <Button onClick={() => setShowAddPreventive(!showAddPreventive)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  {editingPreventive ? 'Edit Preventive Care' : 'Add Preventive Care'}
+                </Button>
+              </div>
+              
+              {showAddPreventive && (
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle>{editingPreventive ? 'Edit Preventive Care' : 'Add New Preventive Care'}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handlePreventiveSubmit} className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium">Type *</label>
+                          <select 
+                            className="w-full p-2 border rounded mt-1"
+                            value={preventiveForm.type}
+                            onChange={(e) => setPreventiveForm({...preventiveForm, type: e.target.value})}
+                            required
+                          >
+                            <option value="">Select type</option>
+                            <option value="Heartworm Prevention">Heartworm Prevention</option>
+                            <option value="Flea/Tick Prevention">Flea/Tick Prevention</option>
+                            <option value="Deworming">Deworming</option>
+                            <option value="Other">Other</option>
+                          </select>
                         </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CardContent>
-              </Card>
+                        <div>
+                          <label className="text-sm font-medium">Product Name *</label>
+                          <input 
+                            className="w-full p-2 border rounded mt-1" 
+                            placeholder="e.g., Heartgard, Nexgard"
+                            value={preventiveForm.name}
+                            onChange={(e) => setPreventiveForm({...preventiveForm, name: e.target.value})}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Date Started *</label>
+                          <input 
+                            type="date" 
+                            className="w-full p-2 border rounded mt-1"
+                            value={preventiveForm.dateStarted}
+                            onChange={(e) => setPreventiveForm({...preventiveForm, dateStarted: e.target.value})}
+                            max={today}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Notes</label>
+                          <input 
+                            className="w-full p-2 border rounded mt-1" 
+                            placeholder="e.g., Monthly prevention"
+                            value={preventiveForm.notes}
+                            onChange={(e) => setPreventiveForm({...preventiveForm, notes: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button type="submit">
+                          {editingPreventive ? 'Update Preventive Care' : 'Save Preventive Care'}
+                        </Button>
+                        <Button type="button" variant="outline" onClick={cancelEditing}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+              )}
+
+              <div className="space-y-4">
+                {preventiveCare.map((preventive) => (
+                  <Card key={preventive.id}>
+                    <CardHeader>
+                      <CardTitle className="flex justify-between items-center">
+                        {preventive.name}
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleEditPreventive(preventive)}
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => handleDeletePreventive(preventive.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-gray-600">Type</p>
+                          <Badge variant="outline">{preventive.type}</Badge>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-600">Date Started</p>
+                          <p className="font-medium">{formatDate(preventive.dateStarted)}</p>
+                        </div>
+                      </div>
+                      {preventive.notes && (
+                        <p className="text-sm text-gray-600 mt-2">{preventive.notes}</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </TabsContent>
           )}
 
