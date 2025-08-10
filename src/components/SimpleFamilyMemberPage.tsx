@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,8 +10,31 @@ import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Plus, Edit, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
+// Define types for family members
+type HumanMember = {
+  name: string;
+  species: 'Human';
+  age: number;
+  bloodType: string;
+  image: string;
+  tabs: string[];
+};
+
+type DogMember = {
+  name: string;
+  species: 'Dog';
+  age: number;
+  breed: string;
+  weight: string;
+  microchipId: string;
+  image: string;
+  tabs: string[];
+};
+
+type FamilyMember = HumanMember | DogMember;
+
 // Hardcoded family member data
-const familyData = {
+const familyData: Record<string, FamilyMember> = {
   marissa: {
     name: 'Marissa',
     species: 'Human',
@@ -114,7 +139,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
               <h1 className="text-3xl font-bold text-gray-900">{member.name}</h1>
               <div className="flex items-center gap-2 mt-1">
                 <Badge variant="secondary">{member.species}</Badge>
-                {member.breed && <Badge variant="outline">{member.breed}</Badge>}
+                {member.species === 'Dog' && <Badge variant="outline">{member.breed}</Badge>}
               </div>
             </div>
           </div>
@@ -139,10 +164,10 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <p><span className="font-semibold">Age:</span> {member.age} {member.species === 'Human' ? 'years' : 'years old'}</p>
-                  {member.bloodType && <p><span className="font-semibold">Blood Type:</span> {member.bloodType}</p>}
-                  {member.breed && <p><span className="font-semibold">Breed:</span> {member.breed}</p>}
-                  {member.weight && <p><span className="font-semibold">Weight:</span> {member.weight}</p>}
-                  {member.microchipId && <p><span className="font-semibold">Microchip ID:</span> {member.microchipId}</p>}
+                  {member.species === 'Human' && <p><span className="font-semibold">Blood Type:</span> {member.bloodType}</p>}
+                  {member.species === 'Dog' && <p><span className="font-semibold">Breed:</span> {member.breed}</p>}
+                  {member.species === 'Dog' && <p><span className="font-semibold">Weight:</span> {member.weight}</p>}
+                  {member.species === 'Dog' && <p><span className="font-semibold">Microchip ID:</span> {member.microchipId}</p>}
                 </CardContent>
               </Card>
 
