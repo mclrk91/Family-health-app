@@ -550,6 +550,9 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
 
   // Load data from localStorage on component mount
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+    
     try {
       setLoading(true);
       
@@ -585,35 +588,35 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
         setWeights(initialWeights);
       }
       
-        // Load medications
-  const storedMedications = localStorage.getItem(STORAGE_KEYS.MEDICATIONS(memberId));
-  if (storedMedications) {
-    setMedications(JSON.parse(storedMedications));
-  } else if (isBentley) {
-    setMedications(initialMedications);
-  }
-  
-  setError(null);
-} catch (err) {
-  console.error('Error loading data from localStorage:', err);
-  setError('Failed to load saved data. Starting with default data.');
-  
-  // Fallback to initial data
-  if (isBentley) {
-    setVaccines(initialVaccines);
-    setTestResults(initialTestResults);
-    setDocuments(initialDocuments);
-    setWeights(initialWeights);
-    setMedications(initialMedications);
-  }
-} finally {
-  setLoading(false);
-}
+      // Load medications
+      const storedMedications = localStorage.getItem(STORAGE_KEYS.MEDICATIONS(memberId));
+      if (storedMedications) {
+        setMedications(JSON.parse(storedMedications));
+      } else if (isBentley) {
+        setMedications(initialMedications);
+      }
+      
+      setError(null);
+    } catch (err) {
+      console.error('Error loading data from localStorage:', err);
+      setError('Failed to load saved data. Starting with default data.');
+      
+      // Fallback to initial data
+      if (isBentley) {
+        setVaccines(initialVaccines);
+        setTestResults(initialTestResults);
+        setDocuments(initialDocuments);
+        setWeights(initialWeights);
+        setMedications(initialMedications);
+      }
+    } finally {
+      setLoading(false);
+    }
   }, [memberId]);
 
   // Save data to localStorage whenever it changes
   useEffect(() => {
-    if (!loading) {
+    if (!loading && typeof window !== 'undefined') {
       try {
         localStorage.setItem(STORAGE_KEYS.VACCINES(memberId), JSON.stringify(vaccines));
       } catch (err) {
@@ -623,7 +626,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   }, [vaccines, memberId, loading]);
 
   useEffect(() => {
-    if (!loading) {
+    if (!loading && typeof window !== 'undefined') {
       try {
         localStorage.setItem(STORAGE_KEYS.TEST_RESULTS(memberId), JSON.stringify(testResults));
       } catch (err) {
@@ -633,7 +636,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   }, [testResults, memberId, loading]);
 
   useEffect(() => {
-    if (!loading) {
+    if (!loading && typeof window !== 'undefined') {
       try {
         localStorage.setItem(STORAGE_KEYS.DOCUMENTS(memberId), JSON.stringify(documents));
       } catch (err) {
@@ -643,7 +646,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   }, [documents, memberId, loading]);
 
   useEffect(() => {
-    if (!loading) {
+    if (!loading && typeof window !== 'undefined') {
       try {
         localStorage.setItem(STORAGE_KEYS.WEIGHTS(memberId), JSON.stringify(weights));
       } catch (err) {
@@ -653,7 +656,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   }, [weights, memberId, loading]);
 
   useEffect(() => {
-    if (!loading) {
+    if (!loading && typeof window !== 'undefined') {
       try {
         localStorage.setItem(STORAGE_KEYS.MEDICATIONS(memberId), JSON.stringify(medications));
       } catch (err) {
@@ -712,11 +715,15 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
       setDocuments([]);
       setWeights([]);
       setMedications([]);
-      localStorage.removeItem(STORAGE_KEYS.VACCINES(memberId));
-      localStorage.removeItem(STORAGE_KEYS.TEST_RESULTS(memberId));
-      localStorage.removeItem(STORAGE_KEYS.DOCUMENTS(memberId));
-      localStorage.removeItem(STORAGE_KEYS.WEIGHTS(memberId));
-      localStorage.removeItem(STORAGE_KEYS.MEDICATIONS(memberId));
+      
+      // Clear from localStorage (only on client side)
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(STORAGE_KEYS.VACCINES(memberId));
+        localStorage.removeItem(STORAGE_KEYS.TEST_RESULTS(memberId));
+        localStorage.removeItem(STORAGE_KEYS.DOCUMENTS(memberId));
+        localStorage.removeItem(STORAGE_KEYS.WEIGHTS(memberId));
+        localStorage.removeItem(STORAGE_KEYS.MEDICATIONS(memberId));
+      }
     }
   };
 
