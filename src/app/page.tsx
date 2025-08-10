@@ -1,8 +1,6 @@
-import { Suspense } from 'react';
-import FamilyMemberGrid from '@/components/FamilyMemberGrid';
+import SimpleFamilyGrid from '@/components/SimpleFamilyGrid';
 import QuestionAnswerBox from '@/components/QuestionAnswerBox';
 import Header from '@/components/Header';
-import LoadingSpinner from '@/components/LoadingSpinner';
 
 export default function Home() {
   return (
@@ -15,13 +13,10 @@ export default function Home() {
           </h1>
         </div>
         
-        <Suspense fallback={<LoadingSpinner />}>
-          <FamilyMemberGrid />
-        </Suspense>
+        <SimpleFamilyGrid />
 
         <QuestionAnswerBox />
       </main>
     </div>
   );
 }
-// Test deployment
