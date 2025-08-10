@@ -1,14 +1,19 @@
-// Local development schema using SQLite
-// Copy this to schema.prisma when working locally
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
+
 
 enum Species {
   HUMAN
@@ -96,6 +101,14 @@ model Clinic {
   
   // Relationships
   doctors     Doctor[]
+  labResults  LabResult[]
+  vaccines    Vaccine[]
+  procedures  Procedure[]
+  diagnoses   Diagnosis[]
+  medications Medication[]
+  vitals      Vital[]
+  appointments Appointment[]
+  reminders   Reminder[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -104,8 +117,9 @@ model Clinic {
 model Allergy {
   id          String   @id @default(cuid())
   name        String
-  severity    String?
+  severity    String?  // mild, moderate, severe
   reaction    String?
+  notes       String?
   personId    String
   person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
   
@@ -120,10 +134,13 @@ model Medication {
   frequency   String?
   startDate   DateTime?
   endDate     DateTime?
+  notes       String?
   personId    String
   person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
   doctorId    String?
   doctor      Doctor?  @relation(fields: [doctorId], references: [id])
+  clinicId    String?
+  clinic      Clinic?  @relation(fields: [clinicId], references: [id])
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -132,12 +149,14 @@ model Medication {
 model Diagnosis {
   id          String   @id @default(cuid())
   name        String
-  date        DateTime?
+  date        DateTime
   notes       String?
   personId    String
   person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
   doctorId    String?
   doctor      Doctor?  @relation(fields: [doctorId], references: [id])
+  clinicId    String?
+  clinic      Clinic?  @relation(fields: [clinicId], references: [id])
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -146,12 +165,14 @@ model Diagnosis {
 model Procedure {
   id          String   @id @default(cuid())
   name        String
-  date        DateTime?
+  date        DateTime
   notes       String?
   personId    String
   person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
   doctorId    String?
   doctor      Doctor?  @relation(fields: [doctorId], references: [id])
+  clinicId    String?
+  clinic      Clinic?  @relation(fields: [clinicId], references: [id])
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -167,6 +188,8 @@ model Vaccine {
   person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
   doctorId    String?
   doctor      Doctor?  @relation(fields: [doctorId], references: [id])
+  clinicId    String?
+  clinic      Clinic?  @relation(fields: [clinicId], references: [id])
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -174,15 +197,17 @@ model Vaccine {
 
 model LabResult {
   id          String   @id @default(cuid())
-  testName    String
   date        DateTime
+  testName    String
   notes       String?
   personId    String
   person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
   doctorId    String?
   doctor      Doctor?  @relation(fields: [doctorId], references: [id])
+  clinicId    String?
+  clinic      Clinic?  @relation(fields: [clinicId], references: [id])
   
-  // Components for detailed results
+  // Relationships
   components  LabComponent[]
   
   createdAt DateTime @default(now())
@@ -192,11 +217,13 @@ model LabResult {
 model LabComponent {
   id          String   @id @default(cuid())
   name        String
-  value       String?
+  value       Float?
   unit        String?
-  reference   String?
-  labResultId String
-  labResult   LabResult @relation(fields: [labResultId], references: [id], onDelete: Cascade)
+  referenceLow  Float?
+  referenceHigh Float?
+  isAbnormal   Boolean @default(false)
+  labResultId  String
+  labResult    LabResult @relation(fields: [labResultId], references: [id], onDelete: Cascade)
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -204,8 +231,8 @@ model LabComponent {
 
 model Vital {
   id          String   @id @default(cuid())
-  type        String   // e.g., "blood_pressure", "heart_rate", "temperature", "weight"
-  value       String
+  type        String   // blood pressure, heart rate, temperature, weight, etc.
+  value       Float
   unit        String?
   date        DateTime
   notes       String?
@@ -213,6 +240,8 @@ model Vital {
   person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
   doctorId    String?
   doctor      Doctor?  @relation(fields: [doctorId], references: [id])
+  clinicId    String?
+  clinic      Clinic?  @relation(fields: [clinicId], references: [id])
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -222,11 +251,14 @@ model Appointment {
   id          String   @id @default(cuid())
   title       String
   date        DateTime
+  duration    Int?     // in minutes
   notes       String?
   personId    String
   person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
   doctorId    String?
   doctor      Doctor?  @relation(fields: [doctorId], references: [id])
+  clinicId    String?
+  clinic      Clinic?  @relation(fields: [clinicId], references: [id])
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -239,10 +271,13 @@ model Reminder {
   dueDate     DateTime
   frequency   ReminderFrequency @default(ANNUALLY)
   status      ReminderStatus @default(PENDING)
+  notes       String?
   personId    String
   person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
   doctorId    String?
   doctor      Doctor?  @relation(fields: [doctorId], references: [id])
+  clinicId    String?
+  clinic      Clinic?  @relation(fields: [clinicId], references: [id])
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -251,8 +286,11 @@ model Reminder {
 model Document {
   id          String   @id @default(cuid())
   name        String
-  type        String?
-  url         String
+  fileName    String   // Original filename
+  filePath    String   // Supabase storage path
+  fileSize    Int
+  mimeType    String
+  notes       String?
   personId    String
   person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
   
@@ -262,7 +300,8 @@ model Document {
 
 model HealthSummary {
   id          String   @id @default(cuid())
-  summary     String
+  title       String
+  content     String   // JSON or text content
   date        DateTime
   personId    String
   person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)

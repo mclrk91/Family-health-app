@@ -1,5 +1,6 @@
 import SimpleFamilyGrid from '@/components/SimpleFamilyGrid';
 import QuestionAnswerBox from '@/components/QuestionAnswerBox';
+import HealthDashboard from '@/components/HealthDashboard';
 import Header from '@/components/Header';
 
 export default function Home() {
@@ -12,6 +13,8 @@ export default function Home() {
             Family Health Hub
           </h1>
         </div>
+        
+        <HealthDashboard />
         
         <SimpleFamilyGrid />
 
