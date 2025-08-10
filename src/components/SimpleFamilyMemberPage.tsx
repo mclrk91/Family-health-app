@@ -11,29 +11,16 @@ import { ArrowLeft, Plus, Edit, Trash2, Download, AlertCircle } from 'lucide-rea
 import Link from 'next/link';
 
 // Define types for family members
-type HumanMember = {
+type FamilyMember = {
   name: string;
-  species: 'Human';
   age: number;
-  bloodType: string;
   birthday: string;
   image: string;
   tabs: string[];
+  breed?: string;
+  weight?: string;
+  microchipId?: string;
 };
-
-type DogMember = {
-  name: string;
-  species: 'Dog';
-  age: number;
-  breed: string;
-  weight: string;
-  microchipId: string;
-  birthday: string;
-  image: string;
-  tabs: string[];
-};
-
-type FamilyMember = HumanMember | DogMember;
 
 // Define types for vaccines and test results
 type Vaccine = {
@@ -66,57 +53,46 @@ type Document = {
 const familyData: Record<string, FamilyMember> = {
   marissa: {
     name: 'Marissa',
-    species: 'Human',
     age: 32,
-    bloodType: 'O+',
-    birthday: 'March 15, 1992',
-    image: '/family-photos/marissa.jpg',
+    birthday: 'September 1, 1991',
+    image: '/family-photos/Marissa.JPG',
     tabs: ['Overview', 'Medical Records', 'Documents']
   },
   jack: {
     name: 'Jack',
-    species: 'Human',
     age: 34,
-    bloodType: 'A+',
-    birthday: 'August 22, 1990',
+    birthday: 'May 22, 1989',
     image: '/family-photos/Jack.jpg',
     tabs: ['Overview', 'Medical Records', 'Documents']
   },
   mike: {
     name: 'Mike',
-    species: 'Human',
     age: 64,
-    bloodType: 'O-',
-    birthday: 'December 3, 1960',
+    birthday: 'September 21, 1959',
     image: '/family-photos/Mike.jpg',
     tabs: ['Overview', 'Medical Records', 'Documents']
   },
   tonya: {
     name: 'Tonya',
-    species: 'Human',
     age: 64,
-    bloodType: 'B+',
-    birthday: 'April 18, 1960',
+    birthday: 'November 5, 1959',
     image: '/family-photos/Tonya.jpg',
     tabs: ['Overview', 'Medical Records', 'Documents']
   },
   brandon: {
     name: 'Brandon',
-    species: 'Human',
     age: 29,
-    bloodType: 'AB+',
-    birthday: 'November 7, 1995',
+    birthday: 'April 19, 1994',
     image: '/family-photos/Brandon.jpg',
     tabs: ['Overview', 'Medical Records', 'Documents']
   },
   bentley: {
     name: 'Bentley',
-    species: 'Dog',
     age: 4,
     breed: 'English Cream Golden Retriever',
     weight: '83.9 lbs',
     microchipId: '981020031240389',
-    birthday: 'May 12, 2020',
+    birthday: 'August 14, 2020',
     image: '/family-photos/Bentley.jpg',
     tabs: ['Overview', 'Health Summary', 'Vaccines', 'Medications', 'Medical History', 'Test Results', 'Documents', 'Reminders']
   }
@@ -341,7 +317,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     );
   }
 
-  const isBentley = memberId === 'bentley';
+  const isBentley = memberId === 'bentley' && 'breed' in member && member.breed;
 
   // Export data functionality
   const exportData = () => {
@@ -665,12 +641,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
                     <span className="font-semibold">Birthday:</span>
                     <span className="text-lg font-medium text-blue-600">{member.birthday}</span>
                   </div>
-                  {'bloodType' in member && member.bloodType && (
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold">Blood Type:</span>
-                      <Badge variant="outline" className="text-lg">{member.bloodType}</Badge>
-                    </div>
-                  )}
+
                   {'breed' in member && member.breed && (
                     <div className="flex justify-between items-center">
                       <span className="font-semibold">Breed:</span>

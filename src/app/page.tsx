@@ -14,8 +14,6 @@ export default function Home() {
           </h1>
         </div>
         
-        <HealthDashboard />
-        
         <SimpleFamilyGrid />
 
         <QuestionAnswerBox />
