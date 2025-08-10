@@ -67,14 +67,7 @@ type Medication = {
   notes: string;
 };
 
-// Define types for preventive care
-type PreventiveCare = {
-  id: string;
-  type: string;
-  name: string;
-  dateStarted: string;
-  notes: string;
-};
+
 
 // Hardcoded family member data
 const familyData: Record<string, FamilyMember> = {
@@ -122,11 +115,11 @@ const familyData: Record<string, FamilyMember> = {
     microchipDate: '2020-11-23',
     birthday: 'November 23, 2020',
     image: '/family-photos/Bentley.jpg',
-    tabs: ['Overview', 'Health Summary', 'Vaccines', 'Medications', 'Medical History', 'Test Results', 'Documents', 'Reminders']
+    tabs: ['Overview', 'Vaccines', 'Medications', 'Medical History', 'Test Results', 'Documents']
   }
 };
 
-// Initial vaccine data for Bentley
+// Initial vaccine data for Bentley - restructured to group by vaccine type
 const initialVaccines: Vaccine[] = [
   {
     id: '1',
@@ -405,49 +398,19 @@ const initialMedications: Medication[] = [
   }
 ];
 
-// Initial preventive care for Bentley
-const initialPreventiveCare: PreventiveCare[] = [
-  {
-    id: '1',
-    type: 'Heartworm Prevention',
-    name: 'Heartgard',
-    dateStarted: '2020-10-15',
-    notes: 'Monthly heartworm prevention'
-  },
-  {
-    id: '2',
-    type: 'Flea/Tick Prevention',
-    name: 'Nexgard',
-    dateStarted: '2020-10-15',
-    notes: 'Monthly flea and tick prevention'
-  },
-  {
-    id: '3',
-    type: 'Deworming',
-    name: 'Oral Deworming',
-    dateStarted: '2020-11-23',
-    notes: 'Initial deworming treatment'
-  },
-  {
-    id: '4',
-    type: 'Deworming',
-    name: 'Oral Deworming',
-    dateStarted: '2020-12-23',
-    notes: 'Follow-up deworming treatment'
-  }
-];
+
 
 // Initial weight data for Bentley
 const initialWeights: WeightRecord[] = [
   {
     id: '1',
-    date: '2025-11-26',
+    date: '2024-11-26',
     weight: 83.9,
     notes: 'Annual checkup'
   },
   {
     id: '2',
-    date: '2024-11-26',
+    date: '2023-11-26',
     weight: 83.9,
     notes: 'Annual checkup'
   },
@@ -506,10 +469,8 @@ const STORAGE_KEYS = {
   VACCINES: (memberId: string) => `family-health-vaccines-${memberId}`,
   TEST_RESULTS: (memberId: string) => `family-health-tests-${memberId}`,
   DOCUMENTS: (memberId: string) => `family-health-documents-${memberId}`,
-  REMINDERS: (memberId: string) => `family-health-reminders-${memberId}`,
   WEIGHTS: (memberId: string) => `family-health-weights-${memberId}`,
   MEDICATIONS: (memberId: string) => `family-health-medications-${memberId}`,
-  PREVENTIVE_CARE: (memberId: string) => `family-health-preventive-care-${memberId}`
 };
 
 interface SimpleFamilyMemberPageProps {
@@ -523,8 +484,9 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   const [showUpload, setShowUpload] = useState(false);
   const [showAddWeight, setShowAddWeight] = useState(false);
   const [showAddMedication, setShowAddMedication] = useState(false);
-  const [showAddPreventive, setShowAddPreventive] = useState(false);
+
   const [nextExamDate, setNextExamDate] = useState('11/2025');
+  const [editingExamDate, setEditingExamDate] = useState(false);
   
   // Form states
   const [vaccineForm, setVaccineForm] = useState({
@@ -556,13 +518,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     notes: ''
   });
   
-  // Preventive care form state
-  const [preventiveForm, setPreventiveForm] = useState({
-    type: '',
-    name: '',
-    dateStarted: '',
-    notes: ''
-  });
+
   
   // Document upload state
   const [documentForm, setDocumentForm] = useState({
@@ -577,7 +533,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   const [documents, setDocuments] = useState<Document[]>([]);
   const [weights, setWeights] = useState<WeightRecord[]>([]);
   const [medications, setMedications] = useState<Medication[]>([]);
-  const [preventiveCare, setPreventiveCare] = useState<PreventiveCare[]>([]);
+
   
   // Edit states
   const [editingVaccine, setEditingVaccine] = useState<string | null>(null);
@@ -629,39 +585,30 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
         setWeights(initialWeights);
       }
       
-      // Load medications
-      const storedMedications = localStorage.getItem(STORAGE_KEYS.MEDICATIONS(memberId));
-      if (storedMedications) {
-        setMedications(JSON.parse(storedMedications));
-      } else if (isBentley) {
-        setMedications(initialMedications);
-      }
-      
-      // Load preventive care
-      const storedPreventive = localStorage.getItem(STORAGE_KEYS.PREVENTIVE_CARE(memberId));
-      if (storedPreventive) {
-        setPreventiveCare(JSON.parse(storedPreventive));
-      } else if (isBentley) {
-        setPreventiveCare(initialPreventiveCare);
-      }
-      
-      setError(null);
-    } catch (err) {
-      console.error('Error loading data from localStorage:', err);
-      setError('Failed to load saved data. Starting with default data.');
-      
-      // Fallback to initial data
-      if (isBentley) {
-        setVaccines(initialVaccines);
-        setTestResults(initialTestResults);
-        setDocuments(initialDocuments);
-        setWeights(initialWeights);
-        setMedications(initialMedications);
-        setPreventiveCare(initialPreventiveCare);
-      }
-    } finally {
-      setLoading(false);
-    }
+        // Load medications
+  const storedMedications = localStorage.getItem(STORAGE_KEYS.MEDICATIONS(memberId));
+  if (storedMedications) {
+    setMedications(JSON.parse(storedMedications));
+  } else if (isBentley) {
+    setMedications(initialMedications);
+  }
+  
+  setError(null);
+} catch (err) {
+  console.error('Error loading data from localStorage:', err);
+  setError('Failed to load saved data. Starting with default data.');
+  
+  // Fallback to initial data
+  if (isBentley) {
+    setVaccines(initialVaccines);
+    setTestResults(initialTestResults);
+    setDocuments(initialDocuments);
+    setWeights(initialWeights);
+    setMedications(initialMedications);
+  }
+} finally {
+  setLoading(false);
+}
   }, [memberId]);
 
   // Save data to localStorage whenever it changes
@@ -715,15 +662,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     }
   }, [medications, memberId, loading]);
 
-  useEffect(() => {
-    if (!loading) {
-      try {
-        localStorage.setItem(STORAGE_KEYS.PREVENTIVE_CARE(memberId), JSON.stringify(preventiveCare));
-      } catch (err) {
-        console.error('Error saving preventive care to localStorage:', err);
-      }
-    }
-  }, [preventiveCare, memberId, loading]);
+
 
   if (!member) {
     return (
@@ -751,8 +690,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
       testResults,
       documents,
       weights,
-      medications,
-      preventiveCare
+      medications
     };
     
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -774,13 +712,11 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
       setDocuments([]);
       setWeights([]);
       setMedications([]);
-      setPreventiveCare([]);
       localStorage.removeItem(STORAGE_KEYS.VACCINES(memberId));
       localStorage.removeItem(STORAGE_KEYS.TEST_RESULTS(memberId));
       localStorage.removeItem(STORAGE_KEYS.DOCUMENTS(memberId));
       localStorage.removeItem(STORAGE_KEYS.WEIGHTS(memberId));
       localStorage.removeItem(STORAGE_KEYS.MEDICATIONS(memberId));
-      localStorage.removeItem(STORAGE_KEYS.PREVENTIVE_CARE(memberId));
     }
   };
 
@@ -921,30 +857,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     setShowAddMedication(false);
   };
 
-  // Handle preventive care form submission
-  const handlePreventiveSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (editingPreventive) {
-      // Update existing preventive care
-      setPreventiveCare(preventiveCare.map(p => 
-        p.id === editingPreventive 
-          ? { ...p, ...preventiveForm }
-          : p
-      ));
-      setEditingPreventive(null);
-    } else {
-      // Add new preventive care
-      const newPreventive: PreventiveCare = {
-        id: Date.now().toString(),
-        ...preventiveForm
-      };
-      setPreventiveCare([...preventiveCare, newPreventive]);
-    }
-    
-    setPreventiveForm({ type: '', name: '', dateStarted: '', notes: '' });
-    setShowAddPreventive(false);
-  };
+
 
   // Cancel editing
   const cancelEditing = () => {
@@ -952,17 +865,14 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     setEditingTest(null);
     setEditingWeight(null);
     setEditingMedication(null);
-    setEditingPreventive(null);
     setVaccineForm({ name: '', dateGiven: '', nextDueDate: '', notes: '' });
     setTestForm({ type: '', testDate: '', results: '', notes: '' });
     setWeightForm({ date: '', weight: '', notes: '' });
     setMedicationForm({ name: '', type: '', datePrescribed: '', notes: '' });
-    setPreventiveForm({ type: '', name: '', dateStarted: '', notes: '' });
     setShowAddVaccine(false);
     setShowAddTest(false);
     setShowAddWeight(false);
     setShowAddMedication(false);
-    setShowAddPreventive(false);
   };
 
   // Handle vaccine deletion
@@ -998,17 +908,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     setShowAddMedication(true);
   };
 
-  // Handle preventive care editing
-  const handleEditPreventive = (preventive: PreventiveCare) => {
-    setPreventiveForm({
-      type: preventive.type,
-      name: preventive.name,
-      dateStarted: preventive.dateStarted,
-      notes: preventive.notes
-    });
-    setEditingPreventive(preventive.id);
-    setShowAddPreventive(true);
-  };
+
 
   // Handle medication deletion
   const handleDeleteMedication = (id: string) => {
@@ -1017,12 +917,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     }
   };
 
-  // Handle preventive care deletion
-  const handleDeletePreventive = (id: string) => {
-    if (confirm('Are you sure you want to delete this preventive care record?')) {
-      setPreventiveCare(preventiveCare.filter(p => p.id !== id));
-    }
-  };
+
 
   // Handle document upload
   const handleDocumentUpload = (e: React.FormEvent) => {
@@ -1113,13 +1008,91 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     };
   };
 
-  // Generate weight chart data
+  // Generate weight chart with proper line chart
   const generateWeightChart = () => {
+    if (weights.length === 0) return null;
+    
     const sortedWeights = [...weights].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    return sortedWeights.map(w => ({
-      date: formatDate(w.date),
-      weight: w.weight
-    }));
+    const minWeight = Math.min(...weights.map(w => w.weight));
+    const maxWeight = Math.max(...weights.map(w => w.weight));
+    const weightRange = maxWeight - minWeight;
+    const chartHeight = 200;
+    const chartWidth = 600;
+    const padding = 40;
+    
+    if (sortedWeights.length === 1) {
+      // Single point - show as a dot
+      const x = padding;
+      const y = chartHeight - padding - ((sortedWeights[0].weight - minWeight) / weightRange) * (chartHeight - 2 * padding);
+      return (
+        <svg width={chartWidth} height={chartHeight} className="w-full h-auto">
+          <circle cx={x} cy={y} r="4" fill="#3b82f6" />
+          <text x={x} y={y + 20} textAnchor="middle" className="text-xs fill-gray-600">
+            {sortedWeights[0].weight} lbs
+          </text>
+          <text x={x} y={chartHeight - 5} textAnchor="middle" className="text-xs fill-gray-600">
+            {formatDate(sortedWeights[0].date)}
+          </text>
+        </svg>
+      );
+    }
+    
+    // Multiple points - create line chart
+    const points = sortedWeights.map((weight, index) => {
+      const x = padding + (index / (sortedWeights.length - 1)) * (chartWidth - 2 * padding);
+      const y = chartHeight - padding - ((weight.weight - minWeight) / weightRange) * (chartHeight - 2 * padding);
+      return { x, y, weight, date: weight.date };
+    });
+    
+    const pathData = points.map((point, index) => 
+      `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
+    ).join(' ');
+    
+    return (
+      <svg width={chartWidth} height={chartHeight} className="w-full h-auto">
+        {/* Grid lines */}
+        {Array.from({ length: 5 }, (_, i) => {
+          const y = padding + (i / 4) * (chartHeight - 2 * padding);
+          const weight = maxWeight - (i / 4) * weightRange;
+          return (
+            <g key={i}>
+              <line 
+                x1={padding} y1={y} x2={chartWidth - padding} y2={y} 
+                stroke="#e5e7eb" strokeWidth="1" 
+              />
+              <text x={padding - 10} y={y + 4} className="text-xs fill-gray-500">
+                {weight.toFixed(1)}
+              </text>
+            </g>
+          );
+        })}
+        
+        {/* Line chart */}
+        <path d={pathData} stroke="#3b82f6" strokeWidth="3" fill="none" />
+        
+        {/* Data points */}
+        {points.map((point, index) => (
+          <g key={index}>
+            <circle cx={point.x} cy={point.y} r="4" fill="#3b82f6" />
+            <title>{point.weight} lbs on {formatDate(point.date)}</title>
+          </g>
+        ))}
+        
+        {/* X-axis labels */}
+        {points.map((point, index) => (
+          <text 
+            key={index} 
+            x={point.x} 
+            y={chartHeight - 5} 
+            textAnchor="middle" 
+            className="text-xs fill-gray-600"
+            transform={`rotate(-45 ${point.x} ${chartHeight - 5})`}
+          >
+            {formatDate(point.date)}
+          </text>
+        ))}
+      </svg>
+    );
   };
 
   if (loading) {
@@ -1177,7 +1150,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
               <Download className="w-4 h-4 mr-2" />
               Export Data
             </Button>
-            {(vaccines.length > 0 || testResults.length > 0 || documents.length > 0 || weights.length > 0 || medications.length > 0 || preventiveCare.length > 0) && (
+            {(vaccines.length > 0 || testResults.length > 0 || documents.length > 0 || weights.length > 0 || medications.length > 0) && (
               <Button variant="outline" onClick={clearAllData} className="text-red-600 hover:text-red-700">
                 Clear All Data
               </Button>
@@ -1220,7 +1193,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7">
             {member.tabs.map((tab) => (
               <TabsTrigger key={tab} value={tab} className="text-xs">
                 {tab}
@@ -1336,28 +1309,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
                     <CardContent>
                       {weights.length > 0 ? (
                         <div className="h-48 w-full">
-                          <div className="flex items-center justify-center h-full">
-                            <div className="w-full h-full flex items-end justify-between px-4 pb-4">
-                              {generateWeightChart().map((data, index) => {
-                                const maxWeight = Math.max(...weights.map(w => w.weight));
-                                const minWeight = Math.min(...weights.map(w => w.weight));
-                                const weightRange = maxWeight - minWeight;
-                                const height = weightRange > 0 ? ((data.weight - minWeight) / weightRange) * 100 : 50;
-                                
-                                return (
-                                  <div key={index} className="flex flex-col items-center">
-                                    <div 
-                                      className="w-8 bg-blue-500 rounded-t transition-all duration-300 hover:bg-blue-600"
-                                      style={{ height: `${height}%` }}
-                                      title={`${data.date}: ${data.weight} lbs`}
-                                    ></div>
-                                    <span className="text-xs text-blue-700 mt-1 font-medium">{data.weight}</span>
-                                    <span className="text-xs text-blue-600 mt-1">{data.date}</span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
+                          {generateWeightChart()}
                         </div>
                       ) : (
                         <div className="h-48 w-full flex items-center justify-center text-gray-500">
@@ -1497,56 +1449,58 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
                   </Card>
                 </>
               )}
+
+              {/* Next Annual Exam Card - Only for Bentley */}
+              {isBentley && (
+                <Card className="border-green-200 bg-green-50">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-green-800">🏥 Next Annual Exam</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex justify-between items-center">
+                      {editingExamDate ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={nextExamDate}
+                            onChange={(e) => setNextExamDate(e.target.value)}
+                            className="text-sm border rounded px-2 py-1 w-20"
+                            placeholder="MM/YYYY"
+                          />
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => setEditingExamDate(false)}
+                          >
+                            ✓
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl font-bold text-green-600">{nextExamDate}</span>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => setEditingExamDate(true)}
+                          >
+                            <Edit className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
-          {/* Health Summary Tab (Bentley only) */}
-          {isBentley && (
-            <TabsContent value="Health Summary" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Health Overview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="font-semibold mb-2">Current Weight</h3>
-                      {getCurrentWeight() ? (
-                        <>
-                          <p className="text-2xl font-bold text-blue-600">{getCurrentWeight()?.weight} lbs</p>
-                          <p className="text-sm text-gray-600">Last recorded: {formatDate(getCurrentWeight()?.date || '')}</p>
-                          {(() => {
-                            const change = getWeightChange(getCurrentWeight()!);
-                            if (change) {
-                              return (
-                                <p className={`text-sm ${change.isPositive ? 'text-red-600' : 'text-green-600'}`}>
-                                  {change.isPositive ? '+' : ''}{change.change.toFixed(1)} lbs from previous
-                                </p>
-                              );
-                            }
-                            return null;
-                          })()}
-                        </>
-                      ) : (
-                        <p className="text-lg text-gray-500">No weight data available</p>
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-2">Next Annual Exam</h3>
-                      <p className="text-2xl font-bold text-orange-600">11/2025</p>
-                      <p className="text-sm text-gray-600">Due in ~3 months</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
+
 
           {/* Vaccines Tab (Bentley only) */}
           {isBentley && (
             <TabsContent value="Vaccines" className="mt-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Vaccine History</h2>
+                <h2 className="text-xl font-semibold">Vaccination History</h2>
                 <Button onClick={() => setShowAddVaccine(!showAddVaccine)}>
                   <Plus className="w-4 h-4 mr-2" />
                   {editingVaccine ? 'Edit Vaccine' : 'Add Vaccine'}
@@ -1565,7 +1519,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
                           <label className="text-sm font-medium">Vaccine Name *</label>
                           <input 
                             className="w-full p-2 border rounded mt-1" 
-                            placeholder="e.g., Rabies, DA2PP"
+                            placeholder="e.g., Rabies, DA2PP, Bordetella"
                             value={vaccineForm.name}
                             onChange={(e) => setVaccineForm({...vaccineForm, name: e.target.value})}
                             required
@@ -1592,13 +1546,12 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
                             min={today}
                             required
                           />
-                          <p className="text-xs text-gray-500 mt-1">When booster/expiry is due</p>
                         </div>
                         <div>
                           <label className="text-sm font-medium">Notes</label>
                           <input 
                             className="w-full p-2 border rounded mt-1" 
-                            placeholder="Any additional notes"
+                            placeholder="e.g., 3 Year, Annual, #1 of 2"
                             value={vaccineForm.notes}
                             onChange={(e) => setVaccineForm({...vaccineForm, notes: e.target.value})}
                           />
@@ -1617,45 +1570,65 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
                 </Card>
               )}
 
-              <div className="space-y-4">
-                {vaccines.map((vaccine) => (
-                  <Card key={vaccine.id}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Object.entries(groupVaccinesByName(vaccines)).map(([vaccineName, vaccineList]) => (
+                  <Card key={vaccineName} className="h-fit">
                     <CardHeader>
                       <CardTitle className="flex justify-between items-center">
-                        {vaccine.name}
-                        <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleEditVaccine(vaccine)}
-                          >
-                            <Edit className="w-3 h-3" />
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            onClick={() => handleDeleteVaccine(vaccine.id)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
+                        <span className="text-lg">{vaccineName}</span>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setVaccineForm({
+                              name: vaccineName,
+                              dateGiven: '',
+                              nextDueDate: '',
+                              notes: ''
+                            });
+                            setShowAddVaccine(true);
+                          }}
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          Add Date
+                        </Button>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm text-gray-600">Date Given</p>
-                          <p className="font-medium">{formatDate(vaccine.dateGiven)}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Next Due Date</p>
-                          <p className="font-medium text-lg font-bold text-orange-600">{formatDate(vaccine.nextDueDate)}</p>
-                        </div>
+                      <div className="space-y-3">
+                        {vaccineList.map((vaccine) => (
+                          <div key={vaccine.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-4">
+                                <span className="font-medium">{formatDate(vaccine.dateGiven)}</span>
+                                <span className="text-sm text-gray-600">→ Next due: {formatDate(vaccine.nextDueDate)}</span>
+                                {vaccine.notes && (
+                                  <Badge variant="outline" className="text-xs">
+                                    {vaccine.notes}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleEditVaccine(vaccine)}
+                              >
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => handleDeleteVaccine(vaccine.id)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      {vaccine.notes && (
-                        <p className="text-sm text-gray-600 mt-2">{vaccine.notes}</p>
-                      )}
                     </CardContent>
                   </Card>
                 ))}
@@ -1798,6 +1771,29 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
                 <CardContent>
                   <div className="space-y-4">
                     <div>
+                      <h3 className="font-semibold text-blue-600">Respiratory / Cough Episodes</h3>
+                      <p className="text-sm text-gray-600">02-21-23 — cough follow-up; hydrocodone prescribed</p>
+                      <p className="text-sm text-gray-600">02-13-23 — cough, eye discharge, nasal discharge after daycare; treated with doxycycline & hydrocodone</p>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div>
+                      <h3 className="font-semibold text-blue-600">Eye Inflammation / Discharge Episodes</h3>
+                      <p className="text-sm text-gray-600">06-20-23 — prescribed NeoPolyDex drops</p>
+                      <p className="text-sm text-gray-600">12-14-21 — prescribed NeoPolyDex drops</p>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div>
+                      <h3 className="font-semibold text-blue-600">Allergic Reaction to Neuter</h3>
+                      <p className="text-sm text-gray-600">07-06-21 — treated with antibiotics, topical medication, and rinses</p>
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div>
                       <h3 className="font-semibold text-blue-600">Neuter Surgery</h3>
                       <p className="text-sm text-gray-600">06-29-21</p>
                     </div>
@@ -1805,38 +1801,15 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
                     <Separator />
                     
                     <div>
-                      <h3 className="font-semibold text-red-600">Allergic Reaction to Neuter</h3>
-                      <p className="text-sm text-gray-600">07-06-21 — treated with antibiotics, topical medication, and rinses</p>
+                      <h3 className="font-semibold text-blue-600">Parasite Exams</h3>
+                      <p className="text-sm text-gray-600">Multiple dates, all normal</p>
                     </div>
                     
                     <Separator />
                     
                     <div>
-                      <h3 className="font-semibold text-purple-600">Eye Inflammation / Discharge Episodes</h3>
-                      <p className="text-sm text-gray-600">12-14-21 — prescribed NeoPolyDex drops</p>
-                      <p className="text-sm text-gray-600">06-20-23 — prescribed NeoPolyDex drops</p>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div>
-                      <h3 className="font-semibold text-orange-600">Respiratory / Cough Episodes</h3>
-                      <p className="text-sm text-gray-600">02-13-23 — cough, eye discharge, nasal discharge after daycare; treated with doxycycline & hydrocodone</p>
-                      <p className="text-sm text-gray-600">02-21-23 — cough follow-up; hydrocodone prescribed</p>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div>
-                      <h3 className="font-semibold text-green-600">Parasite Exams</h3>
-                      <p className="text-sm text-gray-600">Multiple dates, all normal (no abnormalities noted in invoices)</p>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div>
-                      <h3 className="font-semibold text-indigo-600">Heartworm Tests</h3>
-                      <p className="text-sm text-gray-600">Annual, all likely negative (since preventive meds given and no treatment noted)</p>
+                      <h3 className="font-semibold text-blue-600">Heartworm Tests</h3>
+                      <p className="text-sm text-gray-600">Annual, all negative</p>
                     </div>
                   </div>
                 </CardContent>
@@ -2075,32 +2048,18 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Type:</span>
-                          <Badge variant="outline" className="text-xs">{doc.type}</Badge>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Size:</span>
-                          <span className="text-gray-800">{doc.size}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Uploaded:</span>
-                          <span className="text-gray-800">{formatDate(doc.uploadDate)}</span>
-                        </div>
-                        {doc.url ? (
-                          <a 
-                            href={doc.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline text-sm block mt-2"
-                          >
-                            View in Google Drive →
-                          </a>
-                        ) : (
-                          <p className="text-green-600 text-sm mt-2">✓ Uploaded successfully</p>
-                        )}
-                      </div>
+                      {doc.url ? (
+                        <a 
+                          href={doc.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline text-sm block mt-2"
+                        >
+                          View in Google Drive →
+                        </a>
+                      ) : (
+                        <p className="text-green-600 text-sm mt-2">✓ Uploaded successfully</p>
+                      )}
                     </CardContent>
                   </Card>
                 ))
@@ -2117,129 +2076,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
             </div>
           </TabsContent>
 
-          {/* Reminders Tab (Bentley only) */}
-          {isBentley && (
-            <TabsContent value="Reminders" className="mt-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Health Reminders</h2>
-                <Button onClick={() => setShowAddPreventive(!showAddPreventive)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  {editingPreventive ? 'Edit Preventive Care' : 'Add Preventive Care'}
-                </Button>
-              </div>
-              
-              {showAddPreventive && (
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle>{editingPreventive ? 'Edit Preventive Care' : 'Add New Preventive Care'}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handlePreventiveSubmit} className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-sm font-medium">Type *</label>
-                          <select 
-                            className="w-full p-2 border rounded mt-1"
-                            value={preventiveForm.type}
-                            onChange={(e) => setPreventiveForm({...preventiveForm, type: e.target.value})}
-                            required
-                          >
-                            <option value="">Select type</option>
-                            <option value="Heartworm Prevention">Heartworm Prevention</option>
-                            <option value="Flea/Tick Prevention">Flea/Tick Prevention</option>
-                            <option value="Deworming">Deworming</option>
-                            <option value="Other">Other</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium">Product Name *</label>
-                          <input 
-                            className="w-full p-2 border rounded mt-1" 
-                            placeholder="e.g., Heartgard, Nexgard"
-                            value={preventiveForm.name}
-                            onChange={(e) => setPreventiveForm({...preventiveForm, name: e.target.value})}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium">Date Started *</label>
-                          <input 
-                            type="date" 
-                            className="w-full p-2 border rounded mt-1"
-                            value={preventiveForm.dateStarted}
-                            onChange={(e) => setPreventiveForm({...preventiveForm, dateStarted: e.target.value})}
-                            max={today}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium">Notes</label>
-                          <input 
-                            className="w-full p-2 border rounded mt-1" 
-                            placeholder="e.g., Monthly prevention"
-                            value={preventiveForm.notes}
-                            onChange={(e) => setPreventiveForm({...preventiveForm, notes: e.target.value})}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button type="submit">
-                          {editingPreventive ? 'Update Preventive Care' : 'Save Preventive Care'}
-                        </Button>
-                        <Button type="button" variant="outline" onClick={cancelEditing}>
-                          Cancel
-                        </Button>
-                      </div>
-                    </form>
-                  </CardContent>
-                </Card>
-              )}
 
-              <div className="space-y-4">
-                {preventiveCare.map((preventive) => (
-                  <Card key={preventive.id}>
-                    <CardHeader>
-                      <CardTitle className="flex justify-between items-center">
-                        {preventive.name}
-                        <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleEditPreventive(preventive)}
-                          >
-                            <Edit className="w-3 h-3" />
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            onClick={() => handleDeletePreventive(preventive.id)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm text-gray-600">Type</p>
-                          <Badge variant="outline">{preventive.type}</Badge>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Date Started</p>
-                          <p className="font-medium">{formatDate(preventive.dateStarted)}</p>
-                        </div>
-                      </div>
-                      {preventive.notes && (
-                        <p className="text-sm text-gray-600 mt-2">{preventive.notes}</p>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-          )}
 
           {/* Medical Records Tab (Humans only) */}
           {!isBentley && (
@@ -2259,3 +2096,21 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     </div>
   );
 }
+
+// Helper function to group vaccines by name
+const groupVaccinesByName = (vaccines: Vaccine[]) => {
+  const grouped: Record<string, Vaccine[]> = {};
+  vaccines.forEach(vaccine => {
+    if (!grouped[vaccine.name]) {
+      grouped[vaccine.name] = [];
+    }
+    grouped[vaccine.name].push(vaccine);
+  });
+  
+  // Sort each group by date (newest first)
+  Object.keys(grouped).forEach(key => {
+    grouped[key].sort((a, b) => new Date(b.dateGiven).getTime() - new Date(a.dateGiven).getTime());
+  });
+  
+  return grouped;
+};
