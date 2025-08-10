@@ -540,13 +540,13 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   const [editingTest, setEditingTest] = useState<string | null>(null);
   const [editingWeight, setEditingWeight] = useState<string | null>(null);
   const [editingMedication, setEditingMedication] = useState<string | null>(null);
-  const [editingPreventive, setEditingPreventive] = useState<string | null>(null);
   
   // Loading and error states
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const member = familyData[memberId as keyof typeof familyData];
+  const isBentley = memberId === 'bentley' && 'breed' in member && member.breed;
 
   // Load data from localStorage on component mount
   useEffect(() => {
@@ -681,8 +681,6 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
       </div>
     );
   }
-
-  const isBentley = memberId === 'bentley' && 'breed' in member && member.breed;
 
   // Export data functionality
   const exportData = () => {
