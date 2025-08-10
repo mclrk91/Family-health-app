@@ -49,6 +49,14 @@ type Document = {
   url?: string;
 };
 
+// Define types for weight records
+type WeightRecord = {
+  id: string;
+  date: string;
+  weight: number;
+  notes?: string;
+};
+
 // Hardcoded family member data
 const familyData: Record<string, FamilyMember> = {
   marissa: {
@@ -170,12 +178,47 @@ const initialDocuments: Document[] = [
   }
 ];
 
+// Initial weight data for Bentley
+const initialWeights: WeightRecord[] = [
+  {
+    id: '1',
+    date: '2024-11-26',
+    weight: 83.9,
+    notes: 'Annual checkup'
+  },
+  {
+    id: '2',
+    date: '2024-10-15',
+    weight: 82.1,
+    notes: 'Monthly weigh-in'
+  },
+  {
+    id: '3',
+    date: '2024-09-20',
+    weight: 80.5,
+    notes: 'Monthly weigh-in'
+  },
+  {
+    id: '4',
+    date: '2024-08-15',
+    weight: 79.2,
+    notes: 'Monthly weigh-in'
+  },
+  {
+    id: '5',
+    date: '2024-07-10',
+    weight: 78.0,
+    notes: 'Monthly weigh-in'
+  }
+];
+
 // Storage keys for localStorage
 const STORAGE_KEYS = {
   VACCINES: (memberId: string) => `family-health-vaccines-${memberId}`,
   TEST_RESULTS: (memberId: string) => `family-health-tests-${memberId}`,
   DOCUMENTS: (memberId: string) => `family-health-documents-${memberId}`,
-  REMINDERS: (memberId: string) => `family-health-reminders-${memberId}`
+  REMINDERS: (memberId: string) => `family-health-reminders-${memberId}`,
+  WEIGHTS: (memberId: string) => `family-health-weights-${memberId}`
 };
 
 interface SimpleFamilyMemberPageProps {
@@ -187,6 +230,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   const [showAddVaccine, setShowAddVaccine] = useState(false);
   const [showAddTest, setShowAddTest] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
+  const [showAddWeight, setShowAddWeight] = useState(false);
   const [nextExamDate, setNextExamDate] = useState('11/2025');
   
   // Form states
@@ -204,6 +248,13 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     notes: ''
   });
   
+  // Weight form state
+  const [weightForm, setWeightForm] = useState({
+    date: '',
+    weight: '',
+    notes: ''
+  });
+  
   // Document upload state
   const [documentForm, setDocumentForm] = useState({
     name: '',
@@ -215,10 +266,12 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   const [vaccines, setVaccines] = useState<Vaccine[]>([]);
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [weights, setWeights] = useState<WeightRecord[]>([]);
   
   // Edit states
   const [editingVaccine, setEditingVaccine] = useState<string | null>(null);
   const [editingTest, setEditingTest] = useState<string | null>(null);
+  const [editingWeight, setEditingWeight] = useState<string | null>(null);
   
   // Loading and error states
   const [loading, setLoading] = useState(true);
@@ -255,6 +308,14 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
         setDocuments(initialDocuments);
       }
       
+      // Load weights
+      const storedWeights = localStorage.getItem(STORAGE_KEYS.WEIGHTS(memberId));
+      if (storedWeights) {
+        setWeights(JSON.parse(storedWeights));
+      } else if (isBentley) {
+        setWeights(initialWeights);
+      }
+      
       setError(null);
     } catch (err) {
       console.error('Error loading data from localStorage:', err);
@@ -265,6 +326,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
         setVaccines(initialVaccines);
         setTestResults(initialTestResults);
         setDocuments(initialDocuments);
+        setWeights(initialWeights);
       }
     } finally {
       setLoading(false);
@@ -302,6 +364,16 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     }
   }, [documents, memberId, loading]);
 
+  useEffect(() => {
+    if (!loading) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.WEIGHTS(memberId), JSON.stringify(weights));
+      } catch (err) {
+        console.error('Error saving weights to localStorage:', err);
+      }
+    }
+  }, [weights, memberId, loading]);
+
   if (!member) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -326,7 +398,8 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
       exportDate: new Date().toISOString(),
       vaccines,
       testResults,
-      documents
+      documents,
+      weights
     };
     
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -346,9 +419,11 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
       setVaccines([]);
       setTestResults([]);
       setDocuments([]);
+      setWeights([]);
       localStorage.removeItem(STORAGE_KEYS.VACCINES(memberId));
       localStorage.removeItem(STORAGE_KEYS.TEST_RESULTS(memberId));
       localStorage.removeItem(STORAGE_KEYS.DOCUMENTS(memberId));
+      localStorage.removeItem(STORAGE_KEYS.WEIGHTS(memberId));
     }
   };
 
@@ -426,14 +501,55 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     setShowAddTest(true);
   };
 
+  // Handle weight form submission
+  const handleWeightSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (editingWeight) {
+      // Update existing weight
+      setWeights(weights.map(w => 
+        w.id === editingWeight 
+          ? { ...w, ...weightForm, weight: parseFloat(weightForm.weight) }
+          : w
+      ));
+      setEditingWeight(null);
+    } else {
+      // Add new weight
+      const newWeight: WeightRecord = {
+        id: Date.now().toString(),
+        date: weightForm.date,
+        weight: parseFloat(weightForm.weight),
+        notes: weightForm.notes
+      };
+      setWeights([...weights, newWeight]);
+    }
+    
+    setWeightForm({ date: '', weight: '', notes: '' });
+    setShowAddWeight(false);
+  };
+
+  // Handle weight editing
+  const handleEditWeight = (weight: WeightRecord) => {
+    setWeightForm({
+      date: weight.date,
+      weight: weight.weight.toString(),
+      notes: weight.notes || ''
+    });
+    setEditingWeight(weight.id);
+    setShowAddWeight(true);
+  };
+
   // Cancel editing
   const cancelEditing = () => {
     setEditingVaccine(null);
     setEditingTest(null);
+    setEditingWeight(null);
     setVaccineForm({ name: '', dateGiven: '', nextDueDate: '', notes: '' });
     setTestForm({ type: '', testDate: '', results: '', notes: '' });
+    setWeightForm({ date: '', weight: '', notes: '' });
     setShowAddVaccine(false);
     setShowAddTest(false);
+    setShowAddWeight(false);
   };
 
   // Handle vaccine deletion
@@ -447,6 +563,13 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   const handleDeleteTest = (id: string) => {
     if (confirm('Are you sure you want to delete this test result?')) {
       setTestResults(testResults.filter(t => t.id !== id));
+    }
+  };
+
+  // Handle weight deletion
+  const handleDeleteWeight = (id: string) => {
+    if (confirm('Are you sure you want to delete this weight record?')) {
+      setWeights(weights.filter(w => w.id !== id));
     }
   };
 
@@ -519,6 +642,35 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   // Get today's date in YYYY-MM-DD format for date inputs
   const today = new Date().toISOString().split('T')[0];
 
+  // Get current weight
+  const getCurrentWeight = () => {
+    if (weights.length === 0) return null;
+    const sortedWeights = [...weights].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return sortedWeights[0];
+  };
+
+  // Get weight change from previous
+  const getWeightChange = (currentWeight: WeightRecord) => {
+    if (weights.length < 2) return null;
+    const sortedWeights = [...weights].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const previousWeight = sortedWeights[1];
+    const change = currentWeight.weight - previousWeight.weight;
+    return {
+      change,
+      isPositive: change > 0,
+      previousWeight: previousWeight.weight
+    };
+  };
+
+  // Generate weight chart data
+  const generateWeightChart = () => {
+    const sortedWeights = [...weights].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    return sortedWeights.map(w => ({
+      date: formatDate(w.date),
+      weight: w.weight
+    }));
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -574,7 +726,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
               <Download className="w-4 h-4 mr-2" />
               Export Data
             </Button>
-            {(vaccines.length > 0 || testResults.length > 0 || documents.length > 0) && (
+            {(vaccines.length > 0 || testResults.length > 0 || documents.length > 0 || weights.length > 0) && (
               <Button variant="outline" onClick={clearAllData} className="text-red-600 hover:text-red-700">
                 Clear All Data
               </Button>
@@ -715,6 +867,179 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
                   <p><span className="font-semibold">Status:</span> <Badge variant="default" className="bg-green-500">Healthy</Badge></p>
                 </CardContent>
               </Card>
+
+              {/* Weight Chart and Table - Only for Bentley */}
+              {isBentley && (
+                <>
+                  {/* Weight Chart */}
+                  <Card className="border-blue-200 bg-blue-50">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-blue-800">📊 Weight Progress Over Time</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {weights.length > 0 ? (
+                        <div className="h-48 w-full">
+                          <div className="flex items-center justify-center h-full">
+                            <div className="w-full h-full flex items-end justify-between px-4 pb-4">
+                              {generateWeightChart().map((data, index) => {
+                                const maxWeight = Math.max(...weights.map(w => w.weight));
+                                const minWeight = Math.min(...weights.map(w => w.weight));
+                                const weightRange = maxWeight - minWeight;
+                                const height = weightRange > 0 ? ((data.weight - minWeight) / weightRange) * 100 : 50;
+                                
+                                return (
+                                  <div key={index} className="flex flex-col items-center">
+                                    <div 
+                                      className="w-8 bg-blue-500 rounded-t transition-all duration-300 hover:bg-blue-600"
+                                      style={{ height: `${height}%` }}
+                                      title={`${data.date}: ${data.weight} lbs`}
+                                    ></div>
+                                    <span className="text-xs text-blue-700 mt-1 font-medium">{data.weight}</span>
+                                    <span className="text-xs text-blue-600 mt-1">{data.date}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="h-48 w-full flex items-center justify-center text-gray-500">
+                          <p>No weight data available</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Weight Table */}
+                  <Card className="border-blue-200 bg-blue-50">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-blue-800">⚖️ Weight History</CardTitle>
+                      <Button 
+                        size="sm" 
+                        onClick={() => setShowAddWeight(!showAddWeight)}
+                        className="ml-auto"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Weight
+                      </Button>
+                    </CardHeader>
+                    <CardContent>
+                      {showAddWeight && (
+                        <div className="mb-4 p-4 bg-white rounded-lg border">
+                          <form onSubmit={handleWeightSubmit} className="space-y-3">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                              <div>
+                                <label className="text-sm font-medium">Date *</label>
+                                <input 
+                                  type="date" 
+                                  className="w-full p-2 border rounded mt-1"
+                                  value={weightForm.date}
+                                  onChange={(e) => setWeightForm({...weightForm, date: e.target.value})}
+                                  max={today}
+                                  required
+                                />
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Weight (lbs) *</label>
+                                <input 
+                                  type="number" 
+                                  step="0.1"
+                                  className="w-full p-2 border rounded mt-1"
+                                  placeholder="e.g., 83.9"
+                                  value={weightForm.weight}
+                                  onChange={(e) => setWeightForm({...weightForm, weight: e.target.value})}
+                                  required
+                                />
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium">Notes</label>
+                                <input 
+                                  className="w-full p-2 border rounded mt-1" 
+                                  placeholder="e.g., Annual checkup"
+                                  value={weightForm.notes}
+                                  onChange={(e) => setWeightForm({...weightForm, notes: e.target.value})}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button type="submit" size="sm">
+                                {editingWeight ? 'Update Weight' : 'Save Weight'}
+                              </Button>
+                              <Button type="button" variant="outline" size="sm" onClick={cancelEditing}>
+                                Cancel
+                              </Button>
+                            </div>
+                          </form>
+                        </div>
+                      )}
+                      
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-blue-200">
+                              <th className="text-left py-2 font-medium text-blue-800">Date</th>
+                              <th className="text-left py-2 font-medium text-blue-800">Weight</th>
+                              <th className="text-left py-2 font-medium text-blue-800">Change</th>
+                              <th className="text-left py-2 font-medium text-blue-800">Notes</th>
+                              <th className="text-left py-2 font-medium text-blue-800">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {weights.length > 0 ? (
+                              [...weights]
+                                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                                .map((weight, index) => {
+                                  const weightChange = index === 0 ? null : getWeightChange(weight);
+                                  return (
+                                    <tr key={weight.id} className="border-b border-blue-100 hover:bg-blue-50">
+                                      <td className="py-2">{formatDate(weight.date)}</td>
+                                      <td className="py-2 font-medium">{weight.weight} lbs</td>
+                                      <td className="py-2">
+                                        {weightChange ? (
+                                          <span className={`font-medium ${weightChange.isPositive ? 'text-red-500' : 'text-green-500'}`}>
+                                            {weightChange.isPositive ? '+' : ''}{weightChange.change.toFixed(1)} lbs
+                                          </span>
+                                        ) : (
+                                          <span className="text-gray-500">-</span>
+                                        )}
+                                      </td>
+                                      <td className="py-2 text-gray-600">{weight.notes || '-'}</td>
+                                      <td className="py-2">
+                                        <div className="flex gap-1">
+                                          <Button 
+                                            size="sm" 
+                                            variant="outline"
+                                            onClick={() => handleEditWeight(weight)}
+                                          >
+                                            <Edit className="w-3 h-3" />
+                                          </Button>
+                                          <Button 
+                                            size="sm" 
+                                            variant="outline" 
+                                            onClick={() => handleDeleteWeight(weight.id)}
+                                            className="text-red-600 hover:text-red-700"
+                                          >
+                                            <Trash2 className="w-3 h-3" />
+                                          </Button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                })
+                            ) : (
+                              <tr>
+                                <td colSpan={5} className="py-4 text-center text-gray-500">
+                                  No weight records available
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
             </div>
           </TabsContent>
 
@@ -729,8 +1054,25 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <h3 className="font-semibold mb-2">Current Weight</h3>
-                      <p className="text-2xl font-bold text-blue-600">83.9 lbs</p>
-                      <p className="text-sm text-gray-600">Last recorded: 11/26/2024</p>
+                      {getCurrentWeight() ? (
+                        <>
+                          <p className="text-2xl font-bold text-blue-600">{getCurrentWeight()?.weight} lbs</p>
+                          <p className="text-sm text-gray-600">Last recorded: {formatDate(getCurrentWeight()?.date || '')}</p>
+                          {(() => {
+                            const change = getWeightChange(getCurrentWeight()!);
+                            if (change) {
+                              return (
+                                <p className={`text-sm ${change.isPositive ? 'text-red-600' : 'text-green-600'}`}>
+                                  {change.isPositive ? '+' : ''}{change.change.toFixed(1)} lbs from previous
+                                </p>
+                              );
+                            }
+                            return null;
+                          })()}
+                        </>
+                      ) : (
+                        <p className="text-lg text-gray-500">No weight data available</p>
+                      )}
                     </div>
                     <div>
                       <h3 className="font-semibold mb-2">Next Annual Exam</h3>
