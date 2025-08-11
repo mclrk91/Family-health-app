@@ -67,8 +67,6 @@ type Medication = {
   notes: string;
 };
 
-
-
 // Storage keys for localStorage
 const STORAGE_KEYS = {
   VACCINES: (memberId: string) => `family-health-vaccines-${memberId}`,
@@ -407,8 +405,6 @@ const initialMedications: Medication[] = [
   }
 ];
 
-
-
 // Initial weight data for Bentley
 const initialWeights: WeightRecord[] = [
   {
@@ -518,8 +514,6 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     notes: ''
   });
   
-
-  
   // Document upload state
   const [documentForm, setDocumentForm] = useState({
     name: '',
@@ -534,7 +528,6 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   const [weights, setWeights] = useState<WeightRecord[]>([]);
   const [medications, setMedications] = useState<Medication[]>([]);
 
-  
   // Edit states
   const [editingVaccine, setEditingVaccine] = useState<string | null>(null);
   const [editingTest, setEditingTest] = useState<string | null>(null);
@@ -544,6 +537,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   // Loading and error states
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   const member = familyData[memberId as keyof typeof familyData];
   
@@ -570,10 +564,15 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   
   const isBentley = memberId === 'bentley' && 'breed' in member && member.breed;
 
+  // Set client flag on mount
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   // Load data from localStorage on component mount
   useEffect(() => {
-    // Only run on client side
-    if (typeof window === 'undefined') return;
+    // Only run on client side and after component has mounted
+    if (!isClient || typeof window === 'undefined') return;
     
     try {
       setLoading(true);
@@ -634,60 +633,58 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     } finally {
       setLoading(false);
     }
-  }, [memberId]);
+  }, [memberId, isBentley, isClient]);
 
-  // Save data to localStorage whenever it changes
+  // Save data to localStorage whenever it changes - only on client side
   useEffect(() => {
-    if (!loading && typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(STORAGE_KEYS.VACCINES(memberId), JSON.stringify(vaccines));
-      } catch (err) {
-        console.error('Error saving vaccines to localStorage:', err);
-      }
+    if (!isClient || !loading || typeof window === 'undefined') return;
+    
+    try {
+      localStorage.setItem(STORAGE_KEYS.VACCINES(memberId), JSON.stringify(vaccines));
+    } catch (err) {
+      console.error('Error saving vaccines to localStorage:', err);
     }
-  }, [vaccines, memberId, loading]);
-
-  useEffect(() => {
-    if (!loading && typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(STORAGE_KEYS.TEST_RESULTS(memberId), JSON.stringify(testResults));
-      } catch (err) {
-        console.error('Error saving test results to localStorage:', err);
-      }
-    }
-  }, [testResults, memberId, loading]);
+  }, [vaccines, memberId, loading, isClient]);
 
   useEffect(() => {
-    if (!loading && typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(STORAGE_KEYS.DOCUMENTS(memberId), JSON.stringify(documents));
-      } catch (err) {
-        console.error('Error saving documents to localStorage:', err);
-      }
+    if (!isClient || !loading || typeof window === 'undefined') return;
+    
+    try {
+      localStorage.setItem(STORAGE_KEYS.TEST_RESULTS(memberId), JSON.stringify(testResults));
+    } catch (err) {
+      console.error('Error saving test results to localStorage:', err);
     }
-  }, [documents, memberId, loading]);
+  }, [testResults, memberId, loading, isClient]);
 
   useEffect(() => {
-    if (!loading && typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(STORAGE_KEYS.WEIGHTS(memberId), JSON.stringify(weights));
-      } catch (err) {
-        console.error('Error saving weights to localStorage:', err);
-      }
+    if (!isClient || !loading || typeof window === 'undefined') return;
+    
+    try {
+      localStorage.setItem(STORAGE_KEYS.DOCUMENTS(memberId), JSON.stringify(documents));
+    } catch (err) {
+      console.error('Error saving documents to localStorage:', err);
     }
-  }, [weights, memberId, loading]);
+  }, [documents, memberId, loading, isClient]);
 
   useEffect(() => {
-    if (!loading && typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(STORAGE_KEYS.MEDICATIONS(memberId), JSON.stringify(medications));
-      } catch (err) {
-        console.error('Error saving medications to localStorage:', err);
-      }
+    if (!isClient || !loading || typeof window === 'undefined') return;
+    
+    try {
+      localStorage.setItem(STORAGE_KEYS.WEIGHTS(memberId), JSON.stringify(weights));
+    } catch (err) {
+      console.error('Error saving weights to localStorage:', err);
     }
-  }, [medications, memberId, loading]);
+  }, [weights, memberId, loading, isClient]);
 
-
+  useEffect(() => {
+    if (!isClient || !loading || typeof window === 'undefined') return;
+    
+    try {
+      localStorage.setItem(STORAGE_KEYS.MEDICATIONS(memberId), JSON.stringify(medications));
+    } catch (err) {
+      console.error('Error saving medications to localStorage:', err);
+    }
+  }, [medications, memberId, loading, isClient]);
 
   if (!member) {
     return (
@@ -706,6 +703,8 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
 
   // Export data functionality
   const exportData = () => {
+    if (typeof window === 'undefined') return;
+    
     const data = {
       member: member.name,
       exportDate: new Date().toISOString(),
@@ -729,6 +728,8 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
 
   // Clear all data
   const clearAllData = () => {
+    if (typeof window === 'undefined') return;
+    
     if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
       setVaccines([]);
       setTestResults([]);
@@ -737,7 +738,7 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
       setMedications([]);
       
       // Clear from localStorage (only on client side)
-      if (typeof window !== 'undefined') {
+      if (isClient) {
         localStorage.removeItem(STORAGE_KEYS.VACCINES(memberId));
         localStorage.removeItem(STORAGE_KEYS.TEST_RESULTS(memberId));
         localStorage.removeItem(STORAGE_KEYS.DOCUMENTS(memberId));
@@ -884,8 +885,6 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     setShowAddMedication(false);
   };
 
-
-
   // Cancel editing
   const cancelEditing = () => {
     setEditingVaccine(null);
@@ -935,16 +934,12 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     setShowAddMedication(true);
   };
 
-
-
   // Handle medication deletion
   const handleDeleteMedication = (id: string) => {
     if (confirm('Are you sure you want to delete this medication record?')) {
       setMedications(medications.filter(m => m.id !== id));
     }
   };
-
-
 
   // Handle document upload
   const handleDocumentUpload = (e: React.FormEvent) => {
@@ -995,21 +990,41 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
 
   // Calculate days until next birthday
   const getDaysUntilBirthday = (birthdayString: string) => {
-    const today = new Date();
-    const birthday = new Date(birthdayString);
-    
-    // Set this year's birthday
-    const thisYearBirthday = new Date(today.getFullYear(), birthday.getMonth(), birthday.getDate());
-    
-    // If this year's birthday has passed, calculate for next year
-    if (thisYearBirthday < today) {
-      thisYearBirthday.setFullYear(today.getFullYear() + 1);
+    try {
+      const today = new Date();
+      
+      // Parse the birthday string more reliably
+      let birthday: Date;
+      if (birthdayString.includes(',')) {
+        // Format: "September 1, 1991"
+        birthday = new Date(birthdayString);
+      } else {
+        // Try ISO format or other formats
+        birthday = new Date(birthdayString);
+      }
+      
+      // Check if date parsing failed
+      if (isNaN(birthday.getTime())) {
+        console.warn('Failed to parse birthday:', birthdayString);
+        return 999; // Return large number to avoid birthday alert
+      }
+      
+      // Set this year's birthday
+      const thisYearBirthday = new Date(today.getFullYear(), birthday.getMonth(), birthday.getDate());
+      
+      // If this year's birthday has passed, calculate for next year
+      if (thisYearBirthday < today) {
+        thisYearBirthday.setFullYear(today.getFullYear() + 1);
+      }
+      
+      const diffTime = thisYearBirthday.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      return diffDays;
+    } catch (error) {
+      console.error('Error calculating days until birthday:', error);
+      return 999; // Return large number to avoid birthday alert
     }
-    
-    const diffTime = thisYearBirthday.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    return diffDays;
   };
 
   // Get today's date in YYYY-MM-DD format for date inputs
@@ -1040,8 +1055,11 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
     if (weights.length === 0) return null;
     
     const sortedWeights = [...weights].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    const minWeight = Math.min(...weights.map(w => w.weight));
-    const maxWeight = Math.max(...weights.map(w => w.weight));
+    
+    // Safely calculate min/max weights
+    const weightValues = weights.map(w => w.weight);
+    const minWeight = weightValues.length > 0 ? Math.min(...weightValues) : 0;
+    const maxWeight = weightValues.length > 0 ? Math.max(...weightValues) : 0;
     const weightRange = maxWeight - minWeight;
     const chartHeight = 200;
     const chartWidth = 600;
