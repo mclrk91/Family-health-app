@@ -546,6 +546,28 @@ export default function SimpleFamilyMemberPage({ memberId }: SimpleFamilyMemberP
   const [error, setError] = useState<string | null>(null);
 
   const member = familyData[memberId as keyof typeof familyData];
+  
+  // Safety check - if member doesn't exist, show error
+  if (!member) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-700">Family member not found: {memberId}</p>
+            </div>
+            <Link href="/">
+              <Button variant="outline">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Family
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   const isBentley = memberId === 'bentley' && 'breed' in member && member.breed;
 
   // Load data from localStorage on component mount
