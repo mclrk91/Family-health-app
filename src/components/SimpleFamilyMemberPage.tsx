@@ -69,6 +69,15 @@ type Medication = {
 
 
 
+// Storage keys for localStorage
+const STORAGE_KEYS = {
+  VACCINES: (memberId: string) => `family-health-vaccines-${memberId}`,
+  TEST_RESULTS: (memberId: string) => `family-health-tests-${memberId}`,
+  DOCUMENTS: (memberId: string) => `family-health-documents-${memberId}`,
+  WEIGHTS: (memberId: string) => `family-health-weights-${memberId}`,
+  MEDICATIONS: (memberId: string) => `family-health-medications-${memberId}`,
+};
+
 // Hardcoded family member data
 const familyData: Record<string, FamilyMember> = {
   marissa: {
@@ -463,15 +472,6 @@ const initialWeights: WeightRecord[] = [
     notes: 'Initial vet visit'
   }
 ];
-
-// Storage keys for localStorage
-const STORAGE_KEYS = {
-  VACCINES: (memberId: string) => `family-health-vaccines-${memberId}`,
-  TEST_RESULTS: (memberId: string) => `family-health-tests-${memberId}`,
-  DOCUMENTS: (memberId: string) => `family-health-documents-${memberId}`,
-  WEIGHTS: (memberId: string) => `family-health-weights-${memberId}`,
-  MEDICATIONS: (memberId: string) => `family-health-medications-${memberId}`,
-};
 
 interface SimpleFamilyMemberPageProps {
   memberId: string;
